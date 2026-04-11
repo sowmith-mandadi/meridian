@@ -1,0 +1,39 @@
+{
+  "name": "meridian-healthcare",
+  "version": "1.0.0",
+  "description": "Healthcare intelligence skills for population health, risk analysis, cohort identification, and governed data access. Built for care managers, analysts, and data teams working with claims, pharmacy, SDOH, and clinical data.",
+  "author": {
+    "name": "Team Meridian",
+    "url": "https://github.com/sowmith-mandadi/meridian"
+  },
+  "repository": "https://github.com/sowmith-mandadi/meridian",
+  "license": "MIT",
+  "keywords": [
+    "healthcare",
+    "population-health",
+    "risk-analysis",
+    "cohort-query",
+    "sdoh",
+    "claims",
+    "drizzle",
+    "turso"
+  ],
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Meridian Healthcare Intelligence",
+    "shortDescription": "Population health skills: cohorts, risk drivers, outreach, charts",
+    "longDescription": "A complete healthcare intelligence toolkit for Codex. Includes skills for querying member cohorts by state/condition/risk, analyzing SDOH and clinical risk drivers, generating outreach recommendations, building chart-ready aggregates, and explaining member-level risk. Designed for Drizzle ORM + Turso/SQLite with a standard healthcare schema (members, claims, pharmacy, SDOH, call center).",
+    "developerName": "Team Meridian",
+    "category": "Data & Analytics",
+    "capabilities": ["Read", "Write"],
+    "websiteURL": "https://github.com/sowmith-mandadi/meridian",
+    "defaultPrompt": [
+      "Find high-risk diabetic members in TX and FL with transportation barriers",
+      "Analyze risk drivers for member M-1042 and recommend outreach",
+      "Generate a bar chart of members by risk tier",
+      "Explain why member M-1100 was flagged as high risk"
+    ],
+    "brandColor": "#10A37F"
+  }
+}

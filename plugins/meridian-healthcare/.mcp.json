@@ -1,0 +1,17 @@
+{
+  "servers": {
+    "turso_healthcare_db": {
+      "command": "npx",
+      "args": ["@libsql/mcp-server"],
+      "env": {
+        "TURSO_DATABASE_URL": "${TURSO_DATABASE_URL}",
+        "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}"
+      },
+      "description": "Healthcare database with members, claims, pharmacy, SDOH, and call center tables"
+    },
+    "openaiDeveloperDocs": {
+      "url": "https://developers.openai.com/mcp",
+      "description": "OpenAI developer documentation for AI SDK and Codex guidance"
+    }
+  }
+}

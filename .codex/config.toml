@@ -17,7 +17,7 @@ model_reasoning_effort = "low"
 
 [profiles.deep]
 model = "gpt-5.4"
-model_reasoning_effort = "extra_high"
+model_reasoning_effort = "xhigh"
 
 [profiles.review]
 model = "gpt-5.4"

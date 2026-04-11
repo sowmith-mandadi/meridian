@@ -10,6 +10,7 @@ import {
   PanelRight,
   Plus,
   Trash2,
+  Sparkles,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -33,6 +34,7 @@ const NAV_ITEMS = [
   { href: "/collaborate", label: "Collaborate", icon: Users },
   { href: "/feedback", label: "Feedback", icon: MessageCircle },
   { href: "/observe", label: "Observe", icon: BarChart3 },
+  { href: "/codex", label: "Codex Story", icon: Sparkles },
 ];
 
 interface ChatSidebarProps {
