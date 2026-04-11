@@ -1,3 +1,4 @@
+import "server-only";
 import NextAuth from "next-auth";
 import Credentials from "next-auth/providers/credentials";
 import { eq } from "drizzle-orm";
@@ -5,6 +6,7 @@ import { db } from "@/lib/db";
 import { users } from "@/lib/schema";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
+  trustHost: true,
   providers: [
     Credentials({
       credentials: {
@@ -17,7 +19,12 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           where: eq(users.email, credentials.email as string),
         });
         if (!user || user.password !== credentials.password) return null;
-        return { id: user.id, email: user.email, name: user.name, role: user.role };
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          role: user.role,
+        };
       },
     }),
   ],
