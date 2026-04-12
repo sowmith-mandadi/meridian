@@ -1,64 +1,56 @@
 ---
 name: pipeline-runner
-description: Runs the 5-step healthcare data pipeline (Ingest, Profile, Standardize, Entity Resolve, Validate) against the Turso database and returns real-time results. Use when building or validating data pipelines.
+description: Runs the 5-step healthcare data pipeline (Ingest, Profile, Standardize, Entity Resolve, Validate) and returns real-time results. Use when building or validating data pipelines.
 ---
 
 # Pipeline Runner Skill
 
-Execute the end-to-end healthcare data pipeline and report results per step.
+Execute the end-to-end healthcare data pipeline.
 
-## Steps
+## How to execute
 
-1. **Ingest** — Count records per source table (members, claims, pharmacy, SDOH, call_center)
-2. **Profile** — Compute column-level stats: min/max/avg age, null rates, risk score distribution
-3. **Standardize** — Validate ICD-10 codes, drug names, date ranges across all records
-4. **Entity Resolve** — Count member linkages across source tables, identify orphan records
-5. **Validate** — Run quality gates: grain check, referential integrity, business rules
+Use the `meridian` MCP server tool `run_pipeline`. Do NOT read source code or write scripts.
 
-## API
-
-`POST /api/pipeline` — streams NDJSON (one JSON object per line).
-
-## Output per step
-
-```json
-{
-  "step": "ingest",
-  "status": "completed",
-  "durationMs": 8,
-  "output": {
-    "members": 500,
-    "claims": 2454,
-    "pharmacy": 1007,
-    "sdoh": 500,
-    "call_center": 305,
-    "total_records": 4713
-  }
-}
+```
+MCP tool: run_pipeline
+Server: meridian
+Input: {} (no arguments)
 ```
 
-## Final Summary
+## What it does
 
-Last line of the stream is always the summary:
+Runs 5 steps sequentially against the healthcare database:
+
+1. **Ingest** — Count records per source table
+2. **Profile** — Compute age/risk stats, null rates, distributions
+3. **Standardize** — Validate ICD-10 codes, drug names, date ranges
+4. **Entity Resolve** — Count member linkages across sources
+5. **Validate** — Run quality gates (grain, referential integrity, business rules)
+
+## Output
+
+Array of step results plus a summary:
 
 ```json
-{
-  "step": "summary",
-  "status": "completed",
-  "durationMs": 13,
-  "output": {
-    "pipeline": "hospitalization_risk_prediction",
-    "stepsCompleted": 5,
-    "stepsTotal": 5,
-    "totalDurationMs": 13,
-    "qualityScore": "100%",
-    "readyForModeling": true
+[
+  {
+    "step": "ingest",
+    "status": "completed",
+    "durationMs": 8,
+    "output": { "members": 500, "claims": 2454, "pharmacy": 1007, "sdoh": 500, "call_center": 305, "total_records": 4766 }
+  },
+  ...
+  {
+    "step": "summary",
+    "status": "completed",
+    "durationMs": 56,
+    "output": { "pipeline": "hospitalization_risk_prediction", "stepsCompleted": 5, "stepsTotal": 5, "qualityScore": "100%", "readyForModeling": true }
   }
-}
+]
 ```
 
-## Conventions
+## Do not
 
-- All fields use camelCase (matching the project's TypeScript/Drizzle conventions)
-- Step names: `ingest`, `profile`, `standardize`, `entity_resolve`, `validate`, `summary`
-- Status values: `completed`, `failed`
+- Do NOT read `src/app/api/pipeline/route.ts`
+- Do NOT write or execute scripts
+- ONLY use `run_pipeline` from the `meridian` MCP server

@@ -36,7 +36,6 @@
       "Explain why member M-1100 was flagged as high risk"
     ],
     "brandColor": "#10A37F",
-    "composerIcon": "./assets/icon.svg",
-    "logo": "./assets/logo.svg"
+    "composerIcon": "./assets/icon.svg"
   }
 }
