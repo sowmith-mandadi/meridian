@@ -85,26 +85,29 @@ export default function ChatPage() {
     [chatId, handleNewChat]
   );
 
-  const lastToolResult = useMemo(() => {
-    for (let i = messages.length - 1; i >= 0; i--) {
-      const msg = messages[i];
+  const allToolResults = useMemo(() => {
+    const results: { toolName: string; result: any }[] = [];
+    for (const msg of messages) {
       if (msg?.role === "assistant" && Array.isArray(msg.parts)) {
         for (const part of msg.parts) {
-          if (
-            part?.type?.startsWith("tool-") &&
-            "result" in part &&
-            part.result != null
-          ) {
-            return {
-              toolName: part.type.replace("tool-", ""),
-              result: part.result,
-            };
+          if (part?.type?.startsWith("tool-")) {
+            const res = (part as any).result ?? (part as any).output ?? null;
+            if (res != null) {
+              results.push({
+                toolName: part.type.replace("tool-", ""),
+                result: res,
+              });
+            }
           }
         }
       }
     }
-    return null;
+    return results;
   }, [messages]);
+
+  const lastToolResult = allToolResults.length > 0
+    ? allToolResults[allToolResults.length - 1]
+    : null;
 
   function handleSend(text: string) {
     if (!text.trim()) return;
@@ -142,7 +145,7 @@ export default function ChatPage() {
             <ResizableHandle withHandle />
             <ResizablePanel defaultSize={18} minSize="220px" maxSize="300px">
               <div className="h-full overflow-hidden">
-                <ExplainPanel toolResult={lastToolResult} />
+                <ExplainPanel toolResult={lastToolResult} allResults={allToolResults} />
               </div>
             </ResizablePanel>
           </>
