@@ -27,7 +27,7 @@ async function getDb() {
   if (db) return { db, schema, orm };
   const drizzleMod = await import("drizzle-orm/libsql/node");
   orm = await import("drizzle-orm");
-  schema = await import("../../src/lib/schema.js");
+  schema = await import("../../src/lib/schema.ts");
   db = drizzleMod.drizzle({
     connection: { url: TURSO_URL!, authToken: TURSO_TOKEN },
     schema,

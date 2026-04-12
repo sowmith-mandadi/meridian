@@ -1,8 +1,8 @@
 {
   "servers": {
     "meridian": {
-      "command": "npx",
-      "args": ["tsx", "./plugins/meridian-healthcare/mcp-server.ts"],
+      "command": "node",
+      "args": ["./plugins/meridian-healthcare/mcp-server.mjs"],
       "env": {
         "TURSO_DATABASE_URL": "${TURSO_DATABASE_URL}",
         "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}",
