@@ -1,0 +1,11 @@
+{
+  "apps": [
+    {
+      "name": "meridian-github",
+      "displayName": "Meridian Repository",
+      "description": "Access the Meridian healthcare intelligence codebase — pipelines, tools, and schema definitions.",
+      "url": "https://github.com/sowmith-mandadi/meridian",
+      "type": "github"
+    }
+  ]
+}
