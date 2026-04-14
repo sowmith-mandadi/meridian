@@ -56,13 +56,13 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center">
-      <Card className="w-full max-w-md">
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-background via-background to-primary/5">
+      <Card className="w-full max-w-md shadow-lg border-border/60">
         <CardHeader className="text-center">
-          <div className="mx-auto mb-2 flex h-12 w-12 items-center justify-center rounded-xl bg-primary">
-            <Activity className="h-6 w-6 text-primary-foreground" />
+          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
+            <Activity className="h-7 w-7 text-primary" />
           </div>
-          <CardTitle className="text-2xl">Meridian</CardTitle>
+          <CardTitle className="text-2xl tracking-tight">Meridian</CardTitle>
           <p className="text-sm text-muted-foreground">
             Healthcare Intelligence Platform
           </p>

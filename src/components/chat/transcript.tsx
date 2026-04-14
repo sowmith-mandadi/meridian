@@ -3,21 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import type { UIMessage } from "ai";
 import { Badge } from "@/components/ui/badge";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import { Skeleton } from "@/components/ui/skeleton";
 import {
   Bot,
   User,
   ChevronDown,
   ChevronRight,
-  Wrench,
   CheckCircle2,
   Loader2,
   BrainCircuit,
   Clock,
   Coins,
   Timer,
+  Sparkles,
+  ArrowRight,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -41,16 +41,41 @@ export function ChatTranscript({ messages, status }: ChatTranscriptProps) {
 
   if (messages.length === 0) {
     return (
-      <div className="flex flex-1 items-center justify-center">
-        <div className="text-center space-y-3">
-          <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-muted">
-            <Bot className="h-7 w-7 text-muted-foreground" />
+      <div className="flex flex-1 items-center justify-center px-6">
+        <div className="text-center space-y-5 animate-fade-in max-w-lg">
+          <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-br from-primary/20 to-primary/5 ring-1 ring-primary/10">
+            <Sparkles className="h-8 w-8 text-primary" />
           </div>
-          <h2 className="text-lg font-semibold">What can I help you with?</h2>
-          <p className="text-sm text-muted-foreground max-w-md">
-            Ask about member cohorts, risk drivers, outreach recommendations, or
-            explore population health data.
-          </p>
+          <div className="space-y-2">
+            <h2 className="text-xl font-semibold tracking-tight">What can I help you with?</h2>
+            <p className="text-sm text-muted-foreground leading-relaxed">
+              Ask about member cohorts, risk drivers, outreach recommendations,
+              or explore population health data across your organization.
+            </p>
+          </div>
+          <div className="grid grid-cols-2 gap-2 pt-2">
+            {[
+              "High-risk members in TX",
+              "Transportation barriers",
+              "Risk tier breakdown",
+              "Medication adherence",
+            ].map((hint) => (
+              <button
+                key={hint}
+                className="text-left text-xs px-3 py-2.5 rounded-xl border border-border/60 text-muted-foreground hover:text-foreground hover:border-primary/30 hover:bg-primary/5 transition-all duration-200 group"
+                onClick={() => {
+                  window.dispatchEvent(
+                    new CustomEvent("meridian:prompt", { detail: hint })
+                  );
+                }}
+              >
+                <span className="flex items-center gap-1.5">
+                  {hint}
+                  <ArrowRight className="h-3 w-3 opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-200" />
+                </span>
+              </button>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -59,17 +84,21 @@ export function ChatTranscript({ messages, status }: ChatTranscriptProps) {
   return (
     <div ref={scrollRef} className="flex-1 overflow-y-auto min-h-0">
       <div className="max-w-3xl mx-auto px-4 py-6 space-y-6">
-        {messages.map((msg) => (
-          <MessageRow key={msg.id} message={msg} />
+        {messages.map((msg, idx) => (
+          <MessageRow key={msg.id} message={msg} index={idx} />
         ))}
         {isStreaming && messages[messages.length - 1]?.role === "user" && (
-          <div className="flex items-start gap-3">
-            <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary shrink-0">
+          <div className="flex items-start gap-3 animate-fade-in-up">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shrink-0 shadow-sm shadow-primary/20">
               <Bot className="h-4 w-4 text-primary-foreground" />
             </div>
-            <div className="flex items-center gap-2 text-muted-foreground text-sm pt-1">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Thinking...
+            <div className="flex items-center gap-2 text-muted-foreground text-sm pt-2">
+              <div className="flex gap-1">
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-subtle-pulse" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-subtle-pulse [animation-delay:0.2s]" />
+                <span className="h-1.5 w-1.5 rounded-full bg-primary animate-subtle-pulse [animation-delay:0.4s]" />
+              </div>
+              <span className="text-xs">Thinking...</span>
             </div>
           </div>
         )}
@@ -79,7 +108,7 @@ export function ChatTranscript({ messages, status }: ChatTranscriptProps) {
   );
 }
 
-function MessageRow({ message }: { message: UIMessage }) {
+function MessageRow({ message, index }: { message: UIMessage; index: number }) {
   const isUser = message.role === "user";
   const parts = message.parts ?? [];
 
@@ -93,57 +122,62 @@ function MessageRow({ message }: { message: UIMessage }) {
   }));
 
   return (
-    <div className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
-      {!isUser && (
-        <div className="shrink-0 mt-0.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary">
-            <Bot className="h-4 w-4 text-primary-foreground" />
+    <div
+      className="animate-fade-in-up"
+      style={{ animationDelay: `${Math.min(index * 0.04, 0.3)}s` }}
+    >
+      <div className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
+        {!isUser && (
+          <div className="shrink-0 mt-0.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 shadow-sm shadow-primary/20">
+              <Bot className="h-4 w-4 text-primary-foreground" />
+            </div>
           </div>
+        )}
+        <div
+          className={`space-y-3 min-w-0 ${
+            isUser ? "max-w-[80%]" : "flex-1"
+          }`}
+        >
+          {parts.map((part, i) =>
+            part ? <PartRenderer key={i} part={part} isUser={isUser} /> : null
+          )}
+
+          {/* Tool execution timeline */}
+          {!isUser && toolTimeline.length > 1 && (
+            <div className="flex items-center gap-1 flex-wrap">
+              <Timer className="h-3 w-3 text-muted-foreground shrink-0" />
+              {toolTimeline.map((t, i) => (
+                <div key={i} className="flex items-center gap-1">
+                  <Badge
+                    variant="outline"
+                    className={`text-[9px] font-mono transition-colors ${
+                      t.done
+                        ? "border-emerald-500/30 text-emerald-600 dark:text-emerald-400"
+                        : "border-amber-500/30 text-amber-600 dark:text-amber-300"
+                    }`}
+                  >
+                    {t.done ? "\u2713" : "\u27F3"} {t.name}
+                  </Badge>
+                  {i < toolTimeline.length - 1 && (
+                    <span className="text-muted-foreground text-[10px]">\u2192</span>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
+          {/* Token/cost footer */}
+          {!isUser && parts.length > 0 && <MessageFooter />}
         </div>
-      )}
-      <div
-        className={`space-y-3 min-w-0 ${
-          isUser ? "max-w-[80%]" : "flex-1"
-        }`}
-      >
-        {parts.map((part, i) =>
-          part ? <PartRenderer key={i} part={part} isUser={isUser} /> : null
-        )}
-
-        {/* Tool execution timeline */}
-        {!isUser && toolTimeline.length > 1 && (
-          <div className="flex items-center gap-1 flex-wrap">
-            <Timer className="h-3 w-3 text-muted-foreground shrink-0" />
-            {toolTimeline.map((t, i) => (
-              <div key={i} className="flex items-center gap-1">
-                <Badge
-                  variant="outline"
-                  className={`text-[9px] font-mono ${
-                    t.done
-                      ? "border-emerald-500/30 text-emerald-400"
-                      : "border-amber-500/30 text-amber-300"
-                  }`}
-                >
-                  {t.done ? "✓" : "⟳"} {t.name}
-                </Badge>
-                {i < toolTimeline.length - 1 && (
-                  <span className="text-muted-foreground text-[10px]">→</span>
-                )}
-              </div>
-            ))}
+        {isUser && (
+          <div className="shrink-0 mt-0.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-muted ring-1 ring-border/50">
+              <User className="h-4 w-4 text-muted-foreground" />
+            </div>
           </div>
         )}
-
-        {/* Token/cost footer */}
-        {!isUser && parts.length > 0 && <MessageFooter />}
       </div>
-      {isUser && (
-        <div className="shrink-0 mt-0.5">
-          <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-muted">
-            <User className="h-4 w-4" />
-          </div>
-        </div>
-      )}
     </div>
   );
 }
@@ -182,14 +216,14 @@ function MessageFooter() {
   ).toFixed(4);
 
   return (
-    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60 pt-1">
+    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60 pt-1 animate-fade-in">
       <span className="flex items-center gap-1">
         <BrainCircuit className="h-2.5 w-2.5" />
         {usage.model}
       </span>
       <span className="flex items-center gap-1">
         <Coins className="h-2.5 w-2.5" />
-        {totalTokens.toLocaleString()} tokens · ~${estimatedCost}
+        {totalTokens.toLocaleString()} tokens &middot; ~${estimatedCost}
       </span>
       <span className="flex items-center gap-1">
         <Clock className="h-2.5 w-2.5" />
@@ -240,7 +274,7 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
 
     if (isUser) {
       return (
-        <div className="text-sm leading-relaxed bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5">
+        <div className="text-sm leading-relaxed bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5 shadow-sm">
           {part.text}
         </div>
       );
@@ -256,16 +290,16 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
     return (
       <div className="space-y-2">
         {thinkMatch && (
-          <div className="flex items-start gap-2 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
-            <BrainCircuit className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
-            <div className="text-xs text-purple-300/90 leading-relaxed">
-              <span className="font-medium text-purple-300">Thinking: </span>
+          <div className="flex items-start gap-2 rounded-xl border border-purple-500/20 bg-purple-500/5 px-3 py-2">
+            <BrainCircuit className="h-3.5 w-3.5 text-purple-500 dark:text-purple-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-purple-700 dark:text-purple-300/90 leading-relaxed">
+              <span className="font-medium text-purple-600 dark:text-purple-300">Thinking: </span>
               {thinkMatch[1].trim()}
             </div>
           </div>
         )}
         {(restText || !thinkMatch) && (
-          <div className="prose prose-sm prose-invert max-w-none text-sm leading-relaxed">
+          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-foreground/90 prose-strong:text-foreground">
             <ReactMarkdown remarkPlugins={[remarkGfm]}>
               {restText ?? part.text}
             </ReactMarkdown>
@@ -281,16 +315,16 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
     const args = part.args ?? part.input ?? null;
 
     return (
-      <Card className="border-dashed overflow-hidden">
+      <Card className="border-border/60 overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
         {/* Header */}
         <button
-          className="flex w-full items-center gap-2 px-3 py-2.5 text-xs hover:bg-muted/50 transition-colors"
+          className="flex w-full items-center gap-2 px-3 py-2.5 text-xs hover:bg-muted/50 transition-colors duration-150"
           onClick={() => setCollapsed((v) => !v)}
         >
           {hasResult ? (
             <CheckCircle2 className="h-3.5 w-3.5 text-emerald-500 shrink-0" />
           ) : (
-            <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin shrink-0" />
+            <Loader2 className="h-3.5 w-3.5 text-primary animate-spin shrink-0" />
           )}
           <div className="flex flex-col items-start gap-0.5 min-w-0">
             <div className="flex items-center gap-1.5">
@@ -323,9 +357,9 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
 
         {/* Expanded body */}
         {!collapsed && (
-          <CardContent className="px-3 pb-3 pt-0 space-y-3">
+          <CardContent className="px-3 pb-3 pt-0 space-y-3 animate-fade-in">
             {args && typeof args === "object" && (
-              <div className="rounded-md bg-muted/50 p-2">
+              <div className="rounded-lg bg-muted/50 p-2.5">
                 <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mb-1">
                   Input
                 </p>
@@ -373,7 +407,7 @@ function formatToolArgs(toolName: string, args: Record<string, any>): string {
       if (args.states?.length) parts.push(args.states.join(", "));
       if (args.conditions?.length) parts.push(args.conditions.join(", "));
       if (args.riskTier) parts.push(args.riskTier);
-      return parts.join(" · ") || "all";
+      return parts.join(" \u00B7 ") || "all";
     }
     case "get_risk_drivers":
     case "explain_member":
