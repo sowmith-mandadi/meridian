@@ -28,9 +28,4 @@ sandbox_mode = "read-only"
 url = "https://developers.openai.com/mcp"
 
 [mcp_servers.meridian]
-command = "node"
-args = ["./plugins/meridian-healthcare/mcp-server.mjs"]
-startup_timeout_sec = 15
-
-[mcp_servers.meridian.env]
-TURSO_DATABASE_URL = "file:local.db"
+url = "https://meridian-two-drab.vercel.app/api/mcp/mcp"
