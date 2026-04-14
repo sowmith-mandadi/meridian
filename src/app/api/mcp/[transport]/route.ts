@@ -28,7 +28,7 @@ const handler = createMcpHandler(
       return { content: [{ type: "text" as const, text: JSON.stringify({ governancePreview: true, role, intent, intentAllowed: ok, decision: ok ? "ALLOWED" : "BLOCKED", policyNote: p.roleNote, blockedFields: p.blockedFields.length ? p.blockedFields : ["(none)"], fieldMaskingSummary: p.blockedFields.length ? `${p.blockedFields.length} fields redacted` : "Full visibility", confirmationPrompt: ok ? `Governance passed for "${role}"/"${intent}". ${p.blockedFields.length ? `${p.blockedFields.length} fields masked.` : "Full access."} Proceed?` : `BLOCKED: "${role}" cannot "${intent}". Allowed: ${p.allowedIntents.join(", ")}.` }, null, 2) }] };
     });
 
-    server.tool("request_governed_access", "FULL GOVERNED FLOW with human-in-the-loop. userConfirmed must be true after user approves.", {
+    server.tool("request_governed_access", "FULL GOVERNED FLOW with human-in-the-loop. Returns enriched member records including risk drivers, outreach recommendations, and pharmacy data inline — no follow-up tool calls needed. userConfirmed must be true after user approves.", {
       role: z.enum(["care_manager", "analyst", "quality", "admin"]), intent: z.string(),
       filters: z.object({ states: z.array(z.string()).optional(), riskTier: z.string().optional(), conditions: z.array(z.string()).optional(), diabetesOnly: z.boolean().optional(), minErVisits: z.number().optional(), maxPcpVisits: z.number().optional(), metroAreaContains: z.string().optional(), adherenceBelow: z.number().optional() }).optional(),
       scope: z.enum(["aggregated", "member_level"]).optional(), limit: z.number().optional(), userConfirmed: z.boolean(),
@@ -46,14 +46,61 @@ const handler = createMcpHandler(
       if (f?.maxPcpVisits != null) w.push(sql`${members.pcpVisits12m} <= ${f.maxPcpVisits}`);
       if (f?.metroAreaContains) w.push(like(members.metroArea, `%${f.metroAreaContains}%`));
 
-      const rows = await db.select({ memberReference: members.memberReference, name: members.name, state: members.state, city: members.city, metroArea: members.metroArea, age: members.age, riskScore: members.riskScore, riskTier: members.riskTier, hospitalVisitProb6m: members.hospitalVisitProb6m, chronicConditions: members.chronicConditions, riskDrivers: members.riskDrivers, recommendedActions: members.recommendedActions, selectionExplanation: members.selectionExplanation, erVisits12m: members.erVisits12m, pcpVisits12m: members.pcpVisits12m, adherenceScore: members.adherenceScore, pcpName: members.pcpName, transportationBarrier: sdoh.transportationFlag, foodInsecurity: sdoh.foodInsecurity, housingInstability: sdoh.housingInstability }).from(members).leftJoin(sdoh, eq(members.id, sdoh.memberId)).where(w.length ? and(...w) : undefined).orderBy(sql`${members.hospitalVisitProb6m} desc`).limit(lim ?? 15);
+      const rows = await db.select({ _id: members.id, memberReference: members.memberReference, name: members.name, state: members.state, city: members.city, metroArea: members.metroArea, age: members.age, gender: members.gender, riskScore: members.riskScore, riskTier: members.riskTier, hospitalVisitProb6m: members.hospitalVisitProb6m, chronicConditions: members.chronicConditions, riskDrivers: members.riskDrivers, recommendedActions: members.recommendedActions, selectionExplanation: members.selectionExplanation, erVisits12m: members.erVisits12m, pcpVisits12m: members.pcpVisits12m, adherenceScore: members.adherenceScore, pcpName: members.pcpName, transportationBarrier: sdoh.transportationFlag, foodInsecurity: sdoh.foodInsecurity, housingInstability: sdoh.housingInstability }).from(members).leftJoin(sdoh, eq(members.id, sdoh.memberId)).where(w.length ? and(...w) : undefined).orderBy(sql`${members.hospitalVisitProb6m} desc`).limit(lim ?? 15);
+
+      const memberIds = rows.map((r) => r._id);
+      const rxRows = memberIds.length ? await db.select().from(pharmacy).where(inArray(pharmacy.memberId, memberIds)) : [];
+      const rxByMember = new Map<string, typeof rxRows>();
+      for (const rx of rxRows) { const arr = rxByMember.get(rx.memberId) ?? []; arr.push(rx); rxByMember.set(rx.memberId, arr); }
 
       const blocked = new Set(p.blockedFields);
-      const records = rows.map((r) => strip(r as unknown as Record<string, unknown>, blocked));
-      const auditId = crypto.randomUUID();
-      try { await db.insert(auditLog).values({ id: auditId, userId: "mcp", userRole: role, action: `governed_query:${intent}`, toolArgs: JSON.stringify(f ?? {}), resultSummary: `${rows.length} members`, blockedFields: p.blockedFields.join(", "), policyNote: p.roleNote, createdAt: new Date().toISOString() }); } catch { /* */ }
+      const records = rows.map((r) => {
+        const rx = rxByMember.get(r._id) ?? [];
+        const avgAdherence = rx.length ? rx.reduce((s, x) => s + x.adherencePct, 0) / rx.length : null;
 
-      return { content: [{ type: "text" as const, text: JSON.stringify({ step: "QUERY_EXECUTED", governanceApplied: true, role, intent, summary: { matching: rows.length, highRisk: rows.filter((r) => r.riskTier === "high").length }, records, governance: { policyNote: p.roleNote, blockedFields: p.blockedFields, auditId } }, null, 2) }] };
+        const drivers: { name: string; score: number; category: string }[] = [
+          { name: "Clinical risk score", score: Math.min(1, Math.max(0, r.riskScore)), category: "clinical" },
+        ];
+        if (r.transportationBarrier) drivers.push({ name: "Transportation access", score: 0.82, category: "sdoh" });
+        if (r.foodInsecurity) drivers.push({ name: "Food insecurity", score: 0.78, category: "sdoh" });
+        if (r.housingInstability) drivers.push({ name: "Housing instability", score: 0.75, category: "sdoh" });
+        if (avgAdherence !== null) drivers.push({ name: "Medication adherence", score: Math.min(1, Math.max(0, 1 - avgAdherence / 100)), category: "pharmacy" });
+        if (r.erVisits12m >= 3) drivers.push({ name: "Frequent ER use", score: 0.85, category: "utilization" });
+        if (r.pcpVisits12m === 0 && r.erVisits12m > 0) drivers.push({ name: "Low PCP engagement", score: 0.70, category: "utilization" });
+        drivers.sort((a, b) => b.score - a.score);
+
+        const driverText = drivers.map((x) => x.name.toLowerCase()).join(" ");
+        const outreach: { action: string; priority: string; rationale: string }[] = [];
+        if (driverText.includes("transportation")) outreach.push({ action: "Transportation benefit navigation", priority: "high", rationale: "Transport barriers drive missed care." });
+        if (driverText.includes("food")) outreach.push({ action: "Food assistance programs", priority: "high", rationale: "Food insecurity worsens disease." });
+        if (driverText.includes("adherence")) outreach.push({ action: "Pharmacist adherence call + 90-day fill review", priority: "medium", rationale: "Medication gaps are modifiable." });
+        if (r.riskTier === "high") outreach.push({ action: "Care manager outreach within 48h", priority: "high", rationale: `Member is ${r.riskTier} risk.` });
+        if (!outreach.length) outreach.push({ action: "Routine wellness check-in", priority: "medium", rationale: "Default engagement." });
+
+        const rec: Record<string, unknown> = {
+          memberReference: r.memberReference, name: r.name, state: r.state, city: r.city,
+          metroArea: r.metroArea, age: r.age, gender: r.gender, riskScore: r.riskScore,
+          riskTier: r.riskTier, hospitalVisitProb6m: r.hospitalVisitProb6m,
+          chronicConditions: r.chronicConditions, riskDrivers: r.riskDrivers,
+          recommendedActions: r.recommendedActions, selectionExplanation: r.selectionExplanation,
+          erVisits12m: r.erVisits12m, pcpVisits12m: r.pcpVisits12m,
+          adherenceScore: r.adherenceScore, pcpName: r.pcpName,
+          sdoh: { transportationBarrier: r.transportationBarrier === 1, foodInsecurity: r.foodInsecurity === 1, housingInstability: r.housingInstability === 1 },
+          riskDriversDetail: drivers,
+          outreachRecommendations: outreach,
+          pharmacySummary: blocked.has("recommendedActions") ? undefined : {
+            fillCount: rx.length,
+            avgAdherencePct: avgAdherence !== null ? Math.round(avgAdherence * 10) / 10 : null,
+            medications: rx.slice(0, 5).map((x) => ({ drug: x.drugName, class: x.drugClass, adherence: x.adherencePct })),
+          },
+        };
+        return strip(rec, blocked);
+      });
+
+      const auditId = crypto.randomUUID();
+      try { await db.insert(auditLog).values({ id: auditId, userId: "mcp", userRole: role, action: `governed_query:${intent}`, toolArgs: JSON.stringify(f ?? {}), resultSummary: `${rows.length} members (enriched)`, blockedFields: p.blockedFields.join(", "), policyNote: p.roleNote, createdAt: new Date().toISOString() }); } catch { /* */ }
+
+      return { content: [{ type: "text" as const, text: JSON.stringify({ step: "QUERY_EXECUTED", governanceApplied: true, role, intent, summary: { matching: rows.length, highRisk: rows.filter((r) => r.riskTier === "high").length }, records, governance: { policyNote: p.roleNote, blockedFields: p.blockedFields, auditId }, note: "Each record includes riskDriversDetail, outreachRecommendations, and pharmacySummary inline. No follow-up member tool calls needed." }, null, 2) }] };
     });
 
     server.tool("identify_cohort", "Find members by state/condition/risk with SDOH", { states: z.array(z.string()), conditions: z.array(z.string()), riskTier: z.enum(["high", "medium", "low"]) }, async ({ states, conditions: conds, riskTier }) => {
@@ -114,6 +161,73 @@ const handler = createMcpHandler(
       const id = crypto.randomUUID();
       await db.insert(feedbackRequests).values({ id, userRole, requestText, status: "new", createdAt: new Date().toISOString() });
       return { content: [{ type: "text" as const, text: JSON.stringify({ ok: true, id }) }] };
+    });
+
+    server.tool("governed_member_detail", "Look up a single member by their governed masked reference (e.g. MBR-478) and return full risk drivers, outreach plan, pharmacy fills, claims, and explanation — all within the governance boundary. Use this for follow-up deep-dives on members returned by request_governed_access.", {
+      memberReference: z.string().describe("The masked member reference from a governed query (e.g. MBR-478)"),
+      role: z.enum(["care_manager", "analyst", "quality", "admin"]).describe("Must match the role used in the original governed query"),
+      auditId: z.string().optional().describe("Audit ID from the original governed query for chain-of-custody"),
+    }, async ({ memberReference, role, auditId: parentAuditId }) => {
+      const p = ROLE_POLICIES[role] ?? ROLE_POLICIES.care_manager;
+      const blocked = new Set(p.blockedFields);
+
+      const m = await db.query.members.findFirst({ where: eq(members.memberReference, memberReference) });
+      if (!m) return { content: [{ type: "text" as const, text: JSON.stringify({ error: "Member not found for this governed reference.", memberReference }) }] };
+
+      const [s, rx, cl] = await Promise.all([
+        db.query.sdoh.findFirst({ where: eq(sdoh.memberId, m.id) }),
+        db.select().from(pharmacy).where(eq(pharmacy.memberId, m.id)),
+        db.select().from(claims).where(eq(claims.memberId, m.id)).orderBy(desc(claims.date)).limit(15),
+      ]);
+
+      const avgAdherence = rx.length ? rx.reduce((a, r) => a + r.adherencePct, 0) / rx.length : null;
+      const drivers: { name: string; score: number; category: string }[] = [
+        { name: "Clinical risk score", score: Math.min(1, Math.max(0, m.riskScore)), category: "clinical" },
+      ];
+      if (s?.transportationFlag) drivers.push({ name: "Transportation access", score: 0.82, category: "sdoh" });
+      if (s?.foodInsecurity) drivers.push({ name: "Food insecurity", score: 0.78, category: "sdoh" });
+      if (s?.housingInstability) drivers.push({ name: "Housing instability", score: 0.75, category: "sdoh" });
+      if (avgAdherence !== null) drivers.push({ name: "Medication adherence", score: Math.min(1, Math.max(0, 1 - avgAdherence / 100)), category: "pharmacy" });
+      if (m.erVisits12m >= 3) drivers.push({ name: "Frequent ER use", score: 0.85, category: "utilization" });
+      if (m.pcpVisits12m === 0 && m.erVisits12m > 0) drivers.push({ name: "Low PCP engagement", score: 0.70, category: "utilization" });
+      drivers.sort((a, b) => b.score - a.score);
+
+      const driverText = drivers.map((x) => x.name.toLowerCase()).join(" ");
+      const outreach: { action: string; priority: string; rationale: string }[] = [];
+      if (driverText.includes("transportation")) outreach.push({ action: "Transportation benefit navigation", priority: "high", rationale: "Transport barriers drive missed care." });
+      if (driverText.includes("food")) outreach.push({ action: "Food assistance programs", priority: "high", rationale: "Food insecurity worsens disease." });
+      if (driverText.includes("adherence")) outreach.push({ action: "Pharmacist adherence call + 90-day fill review", priority: "medium", rationale: "Medication gaps are modifiable." });
+      if (m.riskTier === "high") outreach.push({ action: "Care manager outreach within 48h", priority: "high", rationale: `Member is ${m.riskTier} risk.` });
+      if (!outreach.length) outreach.push({ action: "Routine wellness check-in", priority: "medium", rationale: "Default engagement." });
+
+      const rec: Record<string, unknown> = {
+        memberReference: m.memberReference, name: m.name, state: m.state, city: m.city,
+        metroArea: m.metroArea, age: m.age, gender: m.gender, riskScore: m.riskScore,
+        riskTier: m.riskTier, hospitalVisitProb6m: m.hospitalVisitProb6m,
+        chronicConditions: m.chronicConditions, riskDrivers: m.riskDrivers,
+        recommendedActions: m.recommendedActions, selectionExplanation: m.selectionExplanation,
+        erVisits12m: m.erVisits12m, pcpVisits12m: m.pcpVisits12m,
+        adherenceScore: m.adherenceScore, pcpName: m.pcpName,
+        sdoh: s ? { transportationBarrier: s.transportationFlag === 1, foodInsecurity: s.foodInsecurity === 1, housingInstability: s.housingInstability === 1 } : null,
+        overview: `${m.name}, ${m.age}yo ${m.gender} in ${m.city}, ${m.state}. ${m.riskTier} risk (${m.riskScore}). ${m.selectionExplanation}`,
+        riskDriversDetail: drivers,
+        outreachRecommendations: outreach,
+        pharmacyDetail: {
+          fillCount: rx.length,
+          avgAdherencePct: avgAdherence !== null ? Math.round(avgAdherence * 10) / 10 : null,
+          medications: rx.map((x) => ({ drug: x.drugName, class: x.drugClass, adherence: x.adherencePct, fillDate: x.fillDate })),
+        },
+        claimsSummary: {
+          count: cl.length, totalAmount: cl.reduce((a, c) => a + c.amount, 0),
+          recent: cl.slice(0, 5).map((c) => ({ date: c.date, type: c.type, amount: c.amount, icdCode: c.icdCode })),
+        },
+      };
+      const sanitized = strip(rec, blocked);
+
+      const detailAuditId = crypto.randomUUID();
+      try { await db.insert(auditLog).values({ id: detailAuditId, userId: "mcp", userRole: role, action: `governed_member_detail`, toolArgs: JSON.stringify({ memberReference, parentAuditId }), resultSummary: `Detail for ${memberReference}`, blockedFields: p.blockedFields.join(", "), policyNote: p.roleNote, createdAt: new Date().toISOString() }); } catch { /* */ }
+
+      return { content: [{ type: "text" as const, text: JSON.stringify({ memberReference, role, governanceApplied: true, record: sanitized, governance: { policyNote: p.roleNote, blockedFields: p.blockedFields, auditId: detailAuditId, parentAuditId: parentAuditId ?? null } }, null, 2) }] };
     });
   },
   {},

@@ -1,14 +1,8 @@
 {
   "servers": {
     "meridian": {
-      "command": "node",
-      "args": ["./plugins/meridian-healthcare/mcp-server.mjs"],
-      "env": {
-        "TURSO_DATABASE_URL": "${TURSO_DATABASE_URL}",
-        "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}",
-        "MERIDIAN_API_URL": "${MERIDIAN_API_URL}"
-      },
-      "description": "Meridian Healthcare Intelligence — 10 tools for cohort queries, risk analysis, outreach, charts, pipeline execution, and governed A2A access with role-based field masking and audit logging"
+      "url": "https://meridian-two-drab.vercel.app/api/mcp/mcp",
+      "description": "Meridian Healthcare Intelligence — remote MCP (Streamable HTTP). Cohort queries, risk analysis, outreach, charts, pipeline, and governed A2A access with role-based masking and audit logging."
     }
   }
 }

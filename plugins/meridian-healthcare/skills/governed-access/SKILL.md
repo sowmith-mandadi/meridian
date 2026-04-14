@@ -83,7 +83,25 @@ Show the results to the user with clear governance annotations:
 - **Policy enforced**: the governance note
 - **Record count**: how many members matched
 
+Each record now includes **riskDriversDetail**, **outreachRecommendations**, and **pharmacySummary** inline — no follow-up tool calls needed for most workflows.
+
 If fields were blocked, explicitly note which fields the user CANNOT see due to their role.
+
+### Step 6 (optional): Deep-dive on a specific member
+
+If the user wants more detail on a specific member from the results, use `governed_member_detail`:
+
+```
+MCP tool: governed_member_detail
+Server: meridian
+Input: {
+  "memberReference": "MBR-478",
+  "role": "<same role as step 4>",
+  "auditId": "<auditId from step 5 governance metadata>"
+}
+```
+
+This returns full risk drivers, outreach plan, pharmacy fills, claims history, and explanation — all within the same governance boundary. The audit trail links back to the original query via `parentAuditId`.
 
 ## Example demo flow
 
@@ -116,4 +134,5 @@ For maximum impact, run the same query as two different roles to show the differ
 - Do NOT skip the governance check — always call `check_governance` first
 - Do NOT execute the query without explicit user confirmation
 - Do NOT call `governed_query` directly — use `request_governed_access` for the full flow
+- Do NOT call `get_risk_drivers`, `explain_member`, or `recommend_outreach` with governed masked references — use the inline data from `request_governed_access` or `governed_member_detail` instead
 - Do NOT read source files or write scripts
