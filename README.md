@@ -4,6 +4,14 @@
 
 Built for the OpenAI Codex Hackathon. Meridian transforms raw healthcare data into actionable insights through governed AI chat, agentic data pipelines, and cross-team agent collaboration.
 
+## Demo
+
+https://github.com/user-attachments/assets/demo.mov
+
+[Watch the demo video](demo.mov) — Agentic pipeline in Codex: inspect dirty data, profile quality issues, clean records, validate, and publish a reusable data product.
+
+**Live app:** [meridian-two-drab.vercel.app](https://meridian-two-drab.vercel.app)
+
 ## Quick Start
 
 ```bash
@@ -32,9 +40,9 @@ Open [http://localhost:3000](http://localhost:3000) and sign in with any demo ac
 
 Three layers:
 
-1. **Agentic Data Engineering** (`/pipeline`) — Visual DAG showing the 5-step data pipeline
-2. **Governed AI Chat** (`/chat`) — Streaming chat with 6 AI tools, explainability panel
-3. **Agent-to-Agent Collaboration** (`/collaborate`) — Animated A2A communication flow
+1. **Agentic Data Engineering** (`/pipeline`) — 10 composable MCP tools: inspect, profile, standardize, resolve entities, quarantine, validate, save runs, create data sources, create and list data products
+2. **Governed AI Chat** (`/chat`) — Streaming chat with 6 AI tools, explainability panel, role-based field masking
+3. **Agent-to-Agent Collaboration** (`/collaborate`) — Governed A2A request flow with 8 shared queries across 4 roles
 
 ## Tech Stack
 
@@ -47,12 +55,25 @@ Three layers:
 - **Recharts** (embedded charts in chat)
 - **react-resizable-panels** (Kanna-inspired three-panel layout)
 
+## Codex Plugin
+
+The `meridian-healthcare` plugin ships 20+ MCP tools via Streamable HTTP:
+
+| Category | Tools |
+|----------|-------|
+| Pipeline | `inspect_sources`, `profile_table`, `standardize_records`, `resolve_entities`, `quarantine_records`, `validate_quality`, `save_pipeline_run` |
+| Data Products | `create_data_source`, `create_data_product`, `list_data_products` |
+| Chat | `identify_cohort`, `get_risk_drivers`, `explain_member`, `recommend_outreach`, `generate_chart`, `submit_feedback` |
+| Governance | `check_governance`, `request_governed_access`, `governed_member_detail` |
+
+**Install:** Add the plugin from `plugins/meridian-healthcare/` or point to the remote MCP endpoint at `https://meridian-two-drab.vercel.app/api/mcp/mcp`.
+
 ## Codex Artifacts
 
 - `AGENTS.md` — Project context for Codex
 - `.codex/config.toml` — Model and agent configuration
 - `.codex/agents/` — Custom subagents (data-seeder, tool-builder, ui-composer)
-- `.agents/skills/` — Reusable skills (cohort-query, explain-risk)
+- `.agents/skills/` — Reusable skills (cohort-query, explain-risk, pipeline-runner, governed-access)
 
 ## Deploy to Vercel
 
@@ -69,9 +90,10 @@ Three layers:
 
 | Route | Description |
 |-------|-------------|
-| `/login` | Role-based login with quick demo access |
+| `/codex` | Landing page — problem, solution, architecture, demo prompts |
 | `/chat` | Governed AI chat with streaming + tool results |
 | `/pipeline` | Agentic data pipeline DAG viewer |
-| `/collaborate` | Agent-to-agent collaboration visualization |
-| `/feedback` | Feedback request CRUD (admin) |
+| `/collaborate` | Agent-to-agent collaboration with shared queries across roles |
+| `/feedback` | Feedback requests with detail popup |
 | `/observe` | Observability dashboard (tokens, latency, cost) |
+| `/login` | Role-based login with quick demo access |
