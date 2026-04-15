@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useState } from "react";
-import { MessageSquarePlus } from "lucide-react";
+import { MessageSquarePlus, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -11,6 +11,12 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -55,6 +61,7 @@ export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [selected, setSelected] = useState<FeedbackRow | null>(null);
 
   const load = useCallback(async () => {
     setError(null);
@@ -207,13 +214,17 @@ export default function FeedbackPage() {
                   </TableRow>
                 ) : null}
                 {items.map((row) => (
-                  <TableRow key={row.id}>
+                  <TableRow
+                    key={row.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => setSelected(row)}
+                  >
                     <TableCell className="font-mono text-xs whitespace-nowrap">
                       {row.id.slice(0, 8)}…
                     </TableCell>
                     <TableCell>{row.userRole}</TableCell>
                     <TableCell className="max-w-md">
-                      <span className="line-clamp-3">{row.requestText}</span>
+                      <span className="line-clamp-2">{row.requestText}</span>
                     </TableCell>
                     <TableCell>{statusBadge(row.status)}</TableCell>
                     <TableCell className="text-muted-foreground text-xs whitespace-nowrap">
@@ -227,6 +238,41 @@ export default function FeedbackPage() {
         </CardContent>
       </Card>
     </div>
+
+      <Dialog open={!!selected} onOpenChange={(open) => !open && setSelected(null)}>
+        <DialogContent className="max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-base">
+              Feedback Detail
+              {selected && statusBadge(selected.status)}
+            </DialogTitle>
+          </DialogHeader>
+          {selected && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Role</p>
+                  <p className="font-medium">{selected.userRole}</p>
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground mb-1">Date</p>
+                  <p className="font-medium">{new Date(selected.createdAt).toLocaleString()}</p>
+                </div>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-1">ID</p>
+                <code className="text-xs rounded bg-muted px-2 py-1">{selected.id}</code>
+              </div>
+              <div>
+                <p className="text-xs text-muted-foreground mb-2">Request</p>
+                <div className="rounded-lg border bg-muted/30 p-4 text-sm leading-relaxed whitespace-pre-wrap">
+                  {selected.requestText}
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
