@@ -829,6 +829,398 @@ server.tool(
   }
 );
 
+// ── Composable Pipeline Tools ────────────────────────────────────────────────
+
+const VALID_ICD_SET = new Set(["E11.9", "I50.9", "J44.1", "I10", "N18.9", "J45.909", "F32.9", "Z00.0"]);
+const ICD_CORRECTIONS: Record<string, string> = { "E119": "E11.9", "I509": "I50.9", "J441": "J44.1", "I1O": "I10", "N189": "N18.9", "j45.909": "J45.909", "F329": "F32.9", "E11": "E11.9", "I50": "I50.9" };
+const VALID_DRUG_SET = new Set(["Metformin", "Ozempic", "Jardiance", "Lisinopril", "Atorvastatin", "Losartan", "Albuterol", "Symbicort", "Sertraline", "Buspirone", "Amlodipine", "Omeprazole", "Insulin Glargine", "Furosemide"]);
+const DRUG_CORRECTIONS: Record<string, string> = { "metformin": "Metformin", "OZEMPIC": "Ozempic", "jardiance": "Jardiance", "Lisinoprl": "Lisinopril", "atorvastatin": "Atorvastatin", "losartan HCL": "Losartan", "albuterol sulfate": "Albuterol", "Symbicrt": "Symbicort", "sertralin": "Sertraline" };
+
+server.tool("inspect_sources", "Inventory all data sources — row counts, columns, null rates, freshness.", {}, async () => {
+  const { db, schema, orm } = await getDb();
+  const { members, claims, pharmacy, sdoh, callCenter, utilization, rawClaims, rawPharmacy, customSources } = schema;
+  const { count, min, max, sql } = orm;
+
+  const KNOWN = [
+    { name: "members", ref: members }, { name: "claims", ref: claims }, { name: "pharmacy", ref: pharmacy },
+    { name: "sdoh", ref: sdoh }, { name: "call_center", ref: callCenter }, { name: "utilization", ref: utilization },
+    { name: "raw_claims", ref: rawClaims }, { name: "raw_pharmacy", ref: rawPharmacy },
+  ];
+
+  const tables: Record<string, unknown>[] = [];
+  for (const t of KNOWN) {
+    const [rc] = await db.select({ count: count() }).from(t.ref);
+    tables.push({ table: t.name, rowCount: rc.count });
+  }
+
+  const customs = await db.select().from(customSources);
+  for (const c of customs) {
+    const result = await db.all(sql.raw(`SELECT COUNT(*) as cnt FROM "${c.tableName}"`));
+    tables.push({ table: c.tableName, rowCount: (result[0] as Record<string, number>)?.cnt ?? 0, custom: true, description: c.description });
+  }
+
+  const [claimDateRange] = await db.select({ earliest: min(claims.date), latest: max(claims.date) }).from(claims);
+  const [rawClaimNulls] = await db.select({
+    nullMemberId: sql<number>`sum(case when member_id = '' then 1 else 0 end)`,
+    nullIcd: sql<number>`sum(case when icd_code = '' then 1 else 0 end)`,
+    nullDate: sql<number>`sum(case when date = '' then 1 else 0 end)`,
+    total: count(),
+  }).from(rawClaims);
+  const [rawRxNulls] = await db.select({
+    nullMemberId: sql<number>`sum(case when member_id = '' then 1 else 0 end)`,
+    nullDrug: sql<number>`sum(case when drug_name = '' then 1 else 0 end)`,
+    nullDate: sql<number>`sum(case when fill_date = '' then 1 else 0 end)`,
+    total: count(),
+  }).from(rawPharmacy);
+
+  return { content: [{ type: "text" as const, text: JSON.stringify({
+    sources: tables,
+    cleanDataFreshness: { claims: claimDateRange },
+    rawDataQuality: {
+      raw_claims: { total: rawClaimNulls.total, nullMemberIds: rawClaimNulls.nullMemberId, nullIcdCodes: rawClaimNulls.nullIcd, nullDates: rawClaimNulls.nullDate },
+      raw_pharmacy: { total: rawRxNulls.total, nullMemberIds: rawRxNulls.nullMemberId, nullDrugNames: rawRxNulls.nullDrug, nullDates: rawRxNulls.nullDate },
+    },
+    hint: "Use profile_table to deep-dive into any table. Use standardize_records to clean raw_claims or raw_pharmacy.",
+  }, null, 2) }] };
+});
+
+server.tool("profile_table", "Deep-dive stats for a single table — distributions, nulls, outliers, distinct counts.", {
+  table: z.string().describe("Table name to profile, e.g. 'members', 'raw_claims', 'raw_pharmacy'"),
+}, async ({ table: tableName }) => {
+  const { db, schema, orm } = await getDb();
+  const { count, min, max, avg, sql } = orm;
+  const profile: Record<string, unknown> = { table: tableName };
+
+  if (tableName === "members") {
+    const [stats] = await db.select({ count: count(), minAge: min(schema.members.age), maxAge: max(schema.members.age), avgAge: avg(schema.members.age), minRisk: min(schema.members.riskScore), maxRisk: max(schema.members.riskScore), avgRisk: avg(schema.members.riskScore) }).from(schema.members);
+    const tierDist = await db.select({ tier: schema.members.riskTier, count: count() }).from(schema.members).groupBy(schema.members.riskTier);
+    const stateDist = await db.select({ state: schema.members.state, count: count() }).from(schema.members).groupBy(schema.members.state);
+    profile.stats = stats; profile.tierDistribution = Object.fromEntries(tierDist.map((r: any) => [r.tier, r.count])); profile.stateDistribution = Object.fromEntries(stateDist.map((r: any) => [r.state, r.count]));
+  } else if (tableName === "raw_claims") {
+    const [stats] = await db.select({ count: count(), minAmt: min(schema.rawClaims.amount), maxAmt: max(schema.rawClaims.amount), avgAmt: avg(schema.rawClaims.amount) }).from(schema.rawClaims);
+    const icdDist = await db.select({ code: schema.rawClaims.icdCode, count: count() }).from(schema.rawClaims).groupBy(schema.rawClaims.icdCode);
+    const typeDist = await db.select({ type: schema.rawClaims.type, count: count() }).from(schema.rawClaims).groupBy(schema.rawClaims.type);
+    const sourceDist = await db.select({ src: schema.rawClaims.sourceFile, count: count() }).from(schema.rawClaims).groupBy(schema.rawClaims.sourceFile);
+    const [nulls] = await db.select({ emptyMemberId: sql<number>`sum(case when member_id='' then 1 else 0 end)`, emptyIcd: sql<number>`sum(case when icd_code='' then 1 else 0 end)`, emptyDate: sql<number>`sum(case when date='' then 1 else 0 end)`, negativeAmt: sql<number>`sum(case when amount<0 then 1 else 0 end)`, outlierAmt: sql<number>`sum(case when amount>100000 then 1 else 0 end)`, total: count() }).from(schema.rawClaims);
+    const [orphans] = await db.select({ count: sql<number>`count(*)` }).from(schema.rawClaims).where(sql`member_id != '' AND member_id NOT IN (SELECT id FROM members)`);
+    const invalidIcd = icdDist.filter((r: any) => r.code !== "" && !VALID_ICD_SET.has(r.code));
+    const today = new Date().toISOString().split("T")[0];
+    const [futureDated] = await db.select({ count: sql<number>`sum(case when date > ${today} then 1 else 0 end)` }).from(schema.rawClaims);
+    profile.stats = stats; profile.icdDistribution = icdDist; profile.typeDistribution = Object.fromEntries(typeDist.map((r: any) => [r.type, r.count])); profile.sourceFiles = Object.fromEntries(sourceDist.map((r: any) => [r.src, r.count]));
+    profile.issues = { ...nulls, orphanMemberIds: orphans.count, invalidIcdCodes: invalidIcd.map((r: any) => ({ code: r.code, count: r.count })), futureDatedRecords: futureDated.count };
+  } else if (tableName === "raw_pharmacy") {
+    const [stats] = await db.select({ count: count(), minAdh: min(schema.rawPharmacy.adherencePct), maxAdh: max(schema.rawPharmacy.adherencePct), avgAdh: avg(schema.rawPharmacy.adherencePct) }).from(schema.rawPharmacy);
+    const drugDist = await db.select({ drug: schema.rawPharmacy.drugName, count: count() }).from(schema.rawPharmacy).groupBy(schema.rawPharmacy.drugName);
+    const [nulls] = await db.select({ emptyMemberId: sql<number>`sum(case when member_id='' then 1 else 0 end)`, emptyDrug: sql<number>`sum(case when drug_name='' then 1 else 0 end)`, emptyDate: sql<number>`sum(case when fill_date='' then 1 else 0 end)`, outOfRangeAdh: sql<number>`sum(case when adherence_pct<0 or adherence_pct>100 then 1 else 0 end)`, total: count() }).from(schema.rawPharmacy);
+    const invalidDrugs = drugDist.filter((r: any) => r.drug !== "" && !VALID_DRUG_SET.has(r.drug));
+    profile.stats = stats; profile.drugDistribution = drugDist; profile.issues = { ...nulls, invalidDrugNames: invalidDrugs.map((r: any) => ({ drug: r.drug, count: r.count, correction: DRUG_CORRECTIONS[r.drug] ?? null })) };
+  } else if (tableName === "claims") {
+    const [stats] = await db.select({ count: count(), minAmt: min(schema.claims.amount), maxAmt: max(schema.claims.amount), avgAmt: avg(schema.claims.amount) }).from(schema.claims);
+    const typeDist = await db.select({ type: schema.claims.type, count: count() }).from(schema.claims).groupBy(schema.claims.type);
+    profile.stats = stats; profile.typeDistribution = Object.fromEntries(typeDist.map((r: any) => [r.type, r.count]));
+  } else if (tableName === "pharmacy") {
+    const [stats] = await db.select({ count: count(), minAdh: min(schema.pharmacy.adherencePct), maxAdh: max(schema.pharmacy.adherencePct), avgAdh: avg(schema.pharmacy.adherencePct) }).from(schema.pharmacy);
+    const drugDist = await db.select({ drug: schema.pharmacy.drugName, count: count() }).from(schema.pharmacy).groupBy(schema.pharmacy.drugName);
+    profile.stats = stats; profile.drugDistribution = drugDist;
+  } else {
+    const result = await db.all(sql.raw(`SELECT COUNT(*) as cnt FROM "${tableName}"`));
+    profile.rowCount = (result[0] as Record<string, number>)?.cnt ?? 0;
+    profile.note = "Basic profile only — use known table names for detailed stats.";
+  }
+
+  return { content: [{ type: "text" as const, text: JSON.stringify(profile, null, 2) }] };
+});
+
+server.tool("standardize_records", "Clean and standardize raw data — fix ICD codes, normalize drug names, flag bad dates, quarantine invalid records.", {
+  source: z.enum(["raw_claims", "raw_pharmacy"]).describe("Which raw table to standardize"),
+  dryRun: z.boolean().optional().describe("Preview changes without writing (default false)"),
+}, async ({ source, dryRun }) => {
+  const { db, schema, orm } = await getDb();
+  const { rawClaims, rawPharmacy, stagingQuarantine, claims, pharmacy } = schema;
+  const isDry = dryRun ?? false;
+  const result: Record<string, unknown> = { source, dryRun: isDry };
+
+  if (source === "raw_claims") {
+    const rows = await db.select().from(rawClaims);
+    const today = new Date().toISOString().split("T")[0];
+    let cleaned = 0, corrected = 0, quarantined = 0;
+    const quarantineReasons: { id: string; reasons: string[] }[] = [];
+    const corrections: { id: string; field: string; from: string; to: string }[] = [];
+
+    for (const row of rows) {
+      const reasons: string[] = [];
+      if (!row.memberId || row.memberId === "") reasons.push("empty_member_id");
+      else if (row.memberId.startsWith("M-ORPHAN")) reasons.push("orphan_member_id");
+      if (row.amount < 0) reasons.push("negative_amount");
+      if (row.amount > 100000) reasons.push("outlier_amount");
+      if (row.date > today && row.date !== "") reasons.push("future_dated");
+      if (row.date === "") reasons.push("empty_date");
+
+      let fixedIcd = row.icdCode;
+      if (row.icdCode && !VALID_ICD_SET.has(row.icdCode)) {
+        const correction = ICD_CORRECTIONS[row.icdCode];
+        if (correction) { fixedIcd = correction; corrections.push({ id: row.id, field: "icd_code", from: row.icdCode, to: correction }); }
+        else if (row.icdCode !== "") reasons.push(`invalid_icd:${row.icdCode}`);
+      }
+
+      if (reasons.length > 0) {
+        quarantined++;
+        quarantineReasons.push({ id: row.id, reasons });
+        if (!isDry) {
+          await db.insert(stagingQuarantine).values({ id: crypto.randomUUID(), sourceTable: "raw_claims", sourceId: row.id, reason: reasons.join(", "), stepName: "standardize_records", recordJson: JSON.stringify(row), createdAt: new Date().toISOString() });
+        }
+      } else {
+        if (fixedIcd !== row.icdCode) corrected++;
+        cleaned++;
+        if (!isDry) {
+          await db.insert(claims).values({ id: `SC-${row.id}`, memberId: row.memberId, icdCode: fixedIcd, type: row.type, amount: row.amount, date: row.date, provider: row.provider }).onConflictDoNothing();
+        }
+      }
+    }
+    result.cleaned = cleaned; result.corrected = corrected; result.quarantined = quarantined;
+    result.sampleCorrections = corrections.slice(0, 10); result.sampleQuarantine = quarantineReasons.slice(0, 10);
+  } else {
+    const rows = await db.select().from(rawPharmacy);
+    let cleaned = 0, corrected = 0, quarantined = 0;
+    const quarantineReasons: { id: string; reasons: string[] }[] = [];
+    const corrections: { id: string; field: string; from: string; to: string }[] = [];
+
+    for (const row of rows) {
+      const reasons: string[] = [];
+      if (!row.memberId || row.memberId === "") reasons.push("empty_member_id");
+      else if (row.memberId.startsWith("M-ORPHAN")) reasons.push("orphan_member_id");
+      if (row.adherencePct < 0 || row.adherencePct > 100) reasons.push(`adherence_out_of_range:${row.adherencePct}`);
+      if (row.fillDate === "") reasons.push("empty_fill_date");
+
+      let fixedDrug = row.drugName;
+      if (row.drugName && !VALID_DRUG_SET.has(row.drugName)) {
+        const correction = DRUG_CORRECTIONS[row.drugName];
+        if (correction) { fixedDrug = correction; corrections.push({ id: row.id, field: "drug_name", from: row.drugName, to: correction }); }
+        else if (row.drugName !== "") reasons.push(`invalid_drug:${row.drugName}`);
+      }
+
+      if (reasons.length > 0) {
+        quarantined++;
+        quarantineReasons.push({ id: row.id, reasons });
+        if (!isDry) {
+          await db.insert(stagingQuarantine).values({ id: crypto.randomUUID(), sourceTable: "raw_pharmacy", sourceId: row.id, reason: reasons.join(", "), stepName: "standardize_records", recordJson: JSON.stringify(row), createdAt: new Date().toISOString() });
+        }
+      } else {
+        if (fixedDrug !== row.drugName) corrected++;
+        cleaned++;
+        if (!isDry) {
+          await db.insert(pharmacy).values({ id: `SP-${row.id}`, memberId: row.memberId, drugName: fixedDrug, drugClass: row.drugClass, adherencePct: row.adherencePct, fillDate: row.fillDate }).onConflictDoNothing();
+        }
+      }
+    }
+    result.cleaned = cleaned; result.corrected = corrected; result.quarantined = quarantined;
+    result.sampleCorrections = corrections.slice(0, 10); result.sampleQuarantine = quarantineReasons.slice(0, 10);
+  }
+
+  return { content: [{ type: "text" as const, text: JSON.stringify(result, null, 2) }] };
+});
+
+server.tool("resolve_entities", "Check entity linkage across data sources. Exact mode checks FK integrity. Fuzzy mode finds potential duplicates.", {
+  strategy: z.enum(["exact", "fuzzy"]).describe("exact = FK check, fuzzy = name similarity matching"),
+}, async ({ strategy }) => {
+  const { db, schema, orm } = await getDb();
+  const { members, claims, pharmacy, sdoh, callCenter, utilization } = schema;
+  const { count, sql } = orm;
+
+  if (strategy === "exact") {
+    const checks = await Promise.all([
+      db.all(sql`SELECT count(*) as cnt FROM claims WHERE member_id NOT IN (SELECT id FROM members)`),
+      db.all(sql`SELECT count(*) as cnt FROM pharmacy WHERE member_id NOT IN (SELECT id FROM members)`),
+      db.all(sql`SELECT count(*) as cnt FROM sdoh WHERE member_id NOT IN (SELECT id FROM members)`),
+      db.all(sql`SELECT count(*) as cnt FROM call_center WHERE member_id NOT IN (SELECT id FROM members)`),
+      db.all(sql`SELECT count(*) as cnt FROM utilization WHERE member_id NOT IN (SELECT id FROM members)`),
+    ]);
+    const [mc] = await db.select({ count: count() }).from(members);
+    const linked = await Promise.all([
+      db.select({ count: sql<number>`count(distinct member_id)` }).from(claims),
+      db.select({ count: sql<number>`count(distinct member_id)` }).from(pharmacy),
+      db.select({ count: sql<number>`count(distinct member_id)` }).from(sdoh),
+    ]);
+    const total = mc.count || 1;
+    return { content: [{ type: "text" as const, text: JSON.stringify({
+      strategy: "exact", totalMembers: mc.count,
+      orphans: { claims: (checks[0][0] as Record<string, number>).cnt, pharmacy: (checks[1][0] as Record<string, number>).cnt, sdoh: (checks[2][0] as Record<string, number>).cnt, call_center: (checks[3][0] as Record<string, number>).cnt, utilization: (checks[4][0] as Record<string, number>).cnt },
+      linkageRates: { claims: `${Math.round((linked[0][0].count / total) * 100)}%`, pharmacy: `${Math.round((linked[1][0].count / total) * 100)}%`, sdoh: `${Math.round((linked[2][0].count / total) * 100)}%` },
+      totalOrphans: checks.reduce((s: number, c: any) => s + (c[0] as Record<string, number>).cnt, 0),
+    }, null, 2) }] };
+  } else {
+    const allMembers = await db.select({ id: members.id, name: members.name, state: members.state }).from(members).limit(500);
+    const candidates: { member1: string; member2: string; name1: string; name2: string; state: string; similarity: string }[] = [];
+    for (let i = 0; i < allMembers.length && candidates.length < 20; i++) {
+      for (let j = i + 1; j < allMembers.length && candidates.length < 20; j++) {
+        const a = allMembers[i], b = allMembers[j];
+        if (a.state !== b.state) continue;
+        const nameParts1 = a.name.toLowerCase().split(" ");
+        const nameParts2 = b.name.toLowerCase().split(" ");
+        const lastMatch = nameParts1.length > 1 && nameParts2.length > 1 && nameParts1[nameParts1.length - 1] === nameParts2[nameParts2.length - 1];
+        if (lastMatch) candidates.push({ member1: a.id, member2: b.id, name1: a.name, name2: b.name, state: a.state, similarity: "same_last_name+state" });
+      }
+    }
+    return { content: [{ type: "text" as const, text: JSON.stringify({ strategy: "fuzzy", candidateDuplicates: candidates.length, candidates: candidates.slice(0, 15) }, null, 2) }] };
+  }
+});
+
+server.tool("quarantine_records", "Move bad records from a source table to the quarantine staging area.", {
+  source: z.enum(["raw_claims", "raw_pharmacy"]).describe("Source table"),
+  reason: z.string().describe("Why these records are being quarantined"),
+  filter: z.object({
+    field: z.string().describe("Column to filter on"),
+    condition: z.enum(["empty", "out_of_range", "orphan", "future_dated"]).describe("Filter condition"),
+  }),
+}, async ({ source, reason, filter }) => {
+  const { db, schema, orm } = await getDb();
+  const { rawClaims, rawPharmacy, stagingQuarantine } = schema;
+  const { sql } = orm;
+  let moved = 0;
+
+  if (source === "raw_claims") {
+    let condition: any;
+    if (filter.condition === "empty") condition = sql.raw(`"${filter.field}" = ''`);
+    else if (filter.condition === "orphan") condition = sql`member_id != '' AND member_id NOT IN (SELECT id FROM members)`;
+    else if (filter.condition === "future_dated") condition = sql`date > ${new Date().toISOString().split("T")[0]}`;
+    else condition = sql`amount < 0 OR amount > 100000`;
+
+    const rows = await db.select().from(rawClaims).where(condition);
+    for (const row of rows) {
+      await db.insert(stagingQuarantine).values({ id: crypto.randomUUID(), sourceTable: "raw_claims", sourceId: row.id, reason, stepName: "quarantine_records", recordJson: JSON.stringify(row), createdAt: new Date().toISOString() });
+      moved++;
+    }
+  } else {
+    let condition: any;
+    if (filter.condition === "empty") condition = sql.raw(`"${filter.field}" = ''`);
+    else if (filter.condition === "orphan") condition = sql`member_id NOT IN (SELECT id FROM members)`;
+    else if (filter.condition === "out_of_range") condition = sql`adherence_pct < 0 OR adherence_pct > 100`;
+    else condition = sql`fill_date = ''`;
+
+    const rows = await db.select().from(rawPharmacy).where(condition);
+    for (const row of rows) {
+      await db.insert(stagingQuarantine).values({ id: crypto.randomUUID(), sourceTable: "raw_pharmacy", sourceId: row.id, reason, stepName: "quarantine_records", recordJson: JSON.stringify(row), createdAt: new Date().toISOString() });
+      moved++;
+    }
+  }
+  return { content: [{ type: "text" as const, text: JSON.stringify({ source, reason, filter, recordsQuarantined: moved }, null, 2) }] };
+});
+
+server.tool("validate_quality", "Run configurable quality gates across the dataset.", {
+  rules: z.array(z.string()).optional().describe("Rules to run. Default: all."),
+  thresholds: z.object({ completeness: z.number().optional(), linkage: z.number().optional() }).optional(),
+}, async ({ rules: ruleList, thresholds }) => {
+  const { db, schema, orm } = await getDb();
+  const { members, claims } = schema;
+  const { count, sql } = orm;
+  const allRules = ruleList ?? ["not_empty", "unique_ids", "required_fields", "risk_range", "tier_consistency", "referential_integrity", "completeness", "distribution", "linkage"];
+  const compThreshold = thresholds?.completeness ?? 0.95;
+  const linkThreshold = thresholds?.linkage ?? 0.90;
+  const results: { rule: string; passed: boolean; detail: string }[] = [];
+  const [mc] = await db.select({ count: count() }).from(members);
+
+  for (const rule of allRules) {
+    if (rule === "not_empty") { results.push({ rule, passed: mc.count > 0, detail: `${mc.count} members` }); }
+    else if (rule === "unique_ids") { const [u] = await db.select({ distinct: sql<number>`count(distinct id)`, total: count() }).from(members); results.push({ rule, passed: u.distinct === u.total, detail: `${u.distinct}/${u.total} unique` }); }
+    else if (rule === "required_fields") { const [n] = await db.select({ cnt: sql<number>`sum(case when member_reference='' or state='' or risk_tier='' then 1 else 0 end)` }).from(members); results.push({ rule, passed: (n.cnt ?? 0) === 0, detail: `${n.cnt ?? 0} missing required fields` }); }
+    else if (rule === "risk_range") { const [r] = await db.select({ cnt: sql<number>`sum(case when risk_score<0 or risk_score>1 then 1 else 0 end)` }).from(members); results.push({ rule, passed: (r.cnt ?? 0) === 0, detail: `${r.cnt ?? 0} out of range` }); }
+    else if (rule === "tier_consistency") { const [t] = await db.select({ cnt: sql<number>`sum(case when risk_tier='high' and risk_score<0.70 then 1 when risk_tier='low' and risk_score>=0.40 then 1 else 0 end)` }).from(members); results.push({ rule, passed: (t.cnt ?? 0) === 0, detail: `${t.cnt ?? 0} inconsistent` }); }
+    else if (rule === "referential_integrity") { const orphans = await db.all(sql`SELECT count(*) as cnt FROM claims WHERE member_id NOT IN (SELECT id FROM members)`); const cnt = (orphans[0] as Record<string, number>)?.cnt ?? 0; results.push({ rule, passed: cnt === 0, detail: `${cnt} orphan claims` }); }
+    else if (rule === "completeness") { const [n] = await db.select({ nullRef: sql<number>`sum(case when member_reference='' then 1 else 0 end)`, nullState: sql<number>`sum(case when state='' then 1 else 0 end)`, nullTier: sql<number>`sum(case when risk_tier='' then 1 else 0 end)`, nullDrivers: sql<number>`sum(case when risk_drivers='' then 1 else 0 end)`, total: count() }).from(members); const total = n.total || 1; const rate = 1 - ((n.nullRef + n.nullState + n.nullTier + n.nullDrivers) / (total * 4)); results.push({ rule, passed: rate >= compThreshold, detail: `${Math.round(rate * 10000) / 100}% complete (threshold: ${compThreshold * 100}%)` }); }
+    else if (rule === "distribution") { const tiers = await db.select({ tier: members.riskTier, count: count() }).from(members).groupBy(members.riskTier); const counts = tiers.map((t: any) => t.count); const ok = counts.length >= 2 && !counts.some((c: number) => c === mc.count); results.push({ rule, passed: ok, detail: `${counts.length} tiers: ${tiers.map((t: any) => `${t.tier}=${t.count}`).join(", ")}` }); }
+    else if (rule === "linkage") { const [lc] = await db.select({ count: sql<number>`count(distinct member_id)` }).from(claims); const rate = mc.count > 0 ? lc.count / mc.count : 0; results.push({ rule, passed: rate >= linkThreshold, detail: `${Math.round(rate * 100)}% linked (threshold: ${linkThreshold * 100}%)` }); }
+  }
+
+  const passed = results.filter((r) => r.passed).length;
+  return { content: [{ type: "text" as const, text: JSON.stringify({ rulesEvaluated: results.length, rulesPassed: passed, qualityScore: `${Math.round((passed / results.length) * 100)}%`, readyForModeling: passed === results.length, results }, null, 2) }] };
+});
+
+server.tool("save_pipeline_run", "Record the agent's pipeline decisions — steps, findings, and quality score.", {
+  steps: z.array(z.object({ name: z.string(), result: z.string(), recordsAffected: z.number() })),
+  qualityScore: z.number().describe("0-100"),
+  notes: z.string().optional(),
+}, async ({ steps: stepList, qualityScore, notes }) => {
+  const { db, schema } = await getDb();
+  const { pipelineRuns } = schema;
+  const id = crypto.randomUUID();
+  await db.insert(pipelineRuns).values({
+    id,
+    status: qualityScore >= 90 ? "passed" : "failed",
+    stepsCompleted: stepList.length,
+    totalSteps: stepList.length,
+    qualityScore: qualityScore / 100,
+    profilingJson: JSON.stringify(stepList),
+    validationJson: JSON.stringify({ notes: notes ?? "" }),
+    durationMs: 0,
+    createdAt: new Date().toISOString(),
+  });
+  return { content: [{ type: "text" as const, text: JSON.stringify({ saved: true, pipelineRunId: id, steps: stepList.length, qualityScore, status: qualityScore >= 90 ? "passed" : "failed" }, null, 2) }] };
+});
+
+server.tool("create_data_source", "Create a new data table from a natural language description. Agent defines columns and optionally inserts sample data.", {
+  name: z.string().describe("Table name (lowercase, underscores)"),
+  description: z.string().describe("What this data source contains"),
+  columns: z.array(z.object({ name: z.string(), type: z.enum(["text", "integer", "real"]), required: z.boolean().optional() })),
+  sampleData: z.array(z.record(z.string(), z.unknown())).optional().describe("Optional rows to insert"),
+}, async ({ name, description, columns, sampleData }) => {
+  const { db, schema, orm } = await getDb();
+  const { customSources } = schema;
+  const { sql } = orm;
+  const safeName = name.replace(/[^a-z0-9_]/g, "_").toLowerCase();
+  const colDefs = columns.map((c: any) => `"${c.name}" ${c.type.toUpperCase()}${c.required ? " NOT NULL" : ""} DEFAULT ${c.type === "text" ? "''" : "0"}`);
+  colDefs.unshift('"id" TEXT PRIMARY KEY');
+
+  await db.run(sql.raw(`CREATE TABLE IF NOT EXISTS "${safeName}" (${colDefs.join(", ")})`));
+
+  let rowCount = 0;
+  if (sampleData?.length) {
+    for (const row of sampleData) {
+      const id = crypto.randomUUID();
+      const cols = ["id", ...Object.keys(row)];
+      const vals = [id, ...Object.values(row)].map((v: unknown) => typeof v === "string" ? `'${String(v).replace(/'/g, "''")}'` : String(v));
+      await db.run(sql.raw(`INSERT OR IGNORE INTO "${safeName}" (${cols.map((c: string) => `"${c}"`).join(", ")}) VALUES (${vals.join(", ")})`));
+      rowCount++;
+    }
+  }
+
+  await db.insert(customSources).values({ id: crypto.randomUUID(), tableName: safeName, columnsJson: JSON.stringify(columns), rowCount, createdBy: "agent", description, createdAt: new Date().toISOString() }).onConflictDoNothing();
+
+  return { content: [{ type: "text" as const, text: JSON.stringify({ created: true, table: safeName, columns: columns.length, rowsInserted: rowCount, description, note: "Table is now visible in inspect_sources and profile_table." }, null, 2) }] };
+});
+
+server.tool("create_data_product", "Save a named, versioned data product definition to the catalog.", {
+  name: z.string().describe("Product name, e.g. 'diabetes_care_gaps'"),
+  description: z.string(),
+  sourceTables: z.array(z.string()).describe("Tables this product draws from"),
+  filters: z.record(z.string(), z.unknown()).optional().describe("Filter criteria as key-value pairs"),
+  columns: z.array(z.string()).optional().describe("Columns to include in the product"),
+}, async ({ name, description, sourceTables, filters, columns: cols }) => {
+  const { db, schema, orm } = await getDb();
+  const { dataProducts } = schema;
+  const { eq, desc } = orm;
+  const id = crypto.randomUUID();
+  const now = new Date().toISOString();
+  const existing = await db.select().from(dataProducts).where(eq(dataProducts.name, name));
+  const version = existing.length > 0 ? Math.max(...existing.map((e: any) => e.version)) + 1 : 1;
+
+  await db.insert(dataProducts).values({
+    id, name, description, createdBy: "agent",
+    sourceTables: JSON.stringify(sourceTables),
+    queryDefinition: JSON.stringify({ filters: filters ?? {}, columns: cols ?? [] }),
+    version, status: "published", createdAt: now, updatedAt: now,
+  });
+
+  return { content: [{ type: "text" as const, text: JSON.stringify({ created: true, productId: id, name, version, sourceTables, status: "published" }, null, 2) }] };
+});
+
+server.tool("list_data_products", "List all saved data products in the catalog.", {}, async () => {
+  const { db, schema, orm } = await getDb();
+  const { dataProducts } = schema;
+  const { desc } = orm;
+  const products = await db.select().from(dataProducts).orderBy(desc(dataProducts.updatedAt));
+  return { content: [{ type: "text" as const, text: JSON.stringify({ count: products.length, products: products.map((p: any) => ({ id: p.id, name: p.name, description: p.description, version: p.version, status: p.status, sourceTables: JSON.parse(p.sourceTables), createdBy: p.createdBy, createdAt: p.createdAt })) }, null, 2) }] };
+});
+
 // ── Start ───────────────────────────────────────────────────────────────────
 
 const transport = new StdioServerTransport();

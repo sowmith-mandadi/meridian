@@ -1,7 +1,7 @@
 {
   "name": "meridian-healthcare",
   "version": "1.0.0",
-  "description": "Healthcare intelligence skills for population health, risk analysis, cohort identification, and governed data access. Built for care managers, analysts, and data teams working with claims, pharmacy, SDOH, and clinical data.",
+  "description": "Healthcare intelligence skills for population health, risk analysis, cohort identification, governed data access, and agentic data pipeline management. Built for care managers, analysts, and data teams working with claims, pharmacy, SDOH, and clinical data.",
   "author": {
     "name": "Team Meridian",
     "url": "https://github.com/sowmith-mandadi/meridian"
@@ -18,6 +18,9 @@
     "governance",
     "a2a",
     "role-based-access",
+    "data-pipeline",
+    "data-products",
+    "agentic-pipeline",
     "drizzle",
     "turso"
   ],
@@ -26,8 +29,8 @@
   "apps": "./.app.json",
   "interface": {
     "displayName": "Meridian Healthcare Intelligence",
-    "shortDescription": "Population health skills with governed A2A access: cohorts, risk drivers, outreach, charts",
-    "longDescription": "A complete healthcare intelligence toolkit for Codex with governed agent-to-agent access. Includes skills for querying member cohorts, analyzing risk drivers, generating outreach recommendations, and building chart aggregates — all with role-based governance, field masking, and audit logging. Features human-in-the-loop governance gates where users must approve access before data flows. Designed for Drizzle ORM + Turso/SQLite.",
+    "shortDescription": "Population health skills with governed A2A access, agentic data pipelines, and data product catalog",
+    "longDescription": "A complete healthcare intelligence toolkit for Codex with governed agent-to-agent access and agentic data pipeline management. Includes 20+ MCP tools for querying member cohorts, analyzing risk drivers, generating outreach recommendations, building chart aggregates, inspecting and profiling data sources, standardizing dirty records, resolving entities, running quality gates, creating custom data sources from natural language, and publishing reusable data products — all with role-based governance, field masking, and audit logging. Designed for Drizzle ORM + Turso/SQLite.",
     "developerName": "Team Meridian",
     "category": "Data & Analytics",
     "capabilities": ["Read", "Write"],
@@ -36,9 +39,9 @@
       "Find high-risk diabetic members in TX and FL with transportation barriers",
       "Analyze risk drivers for member M-1042 and recommend outreach",
       "Generate a bar chart of members by risk tier",
-      "Explain why member M-1100 was flagged as high risk",
-      "Run the governance demo — show me how role-based access control works",
-      "Query high-risk members as an analyst role with governance approval"
+      "Inspect all data sources, profile raw_claims, then standardize them with a dry run first",
+      "Run the full agentic pipeline: inspect, profile, standardize, resolve entities, validate quality, and save the run",
+      "Create a data product called 'diabetes_care_gaps' from members and claims for high-risk diabetic members in TX"
     ],
     "brandColor": "#10A37F",
     "composerIcon": "./assets/icon.svg"
