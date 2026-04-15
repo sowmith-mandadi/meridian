@@ -1,0 +1,18 @@
+{
+  "dataset_name": "holdout_member_top_drivers.csv",
+  "rows": 63,
+  "columns": 9,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "member_id",
+    "index_date",
+    "rank",
+    "feature",
+    "feature_value",
+    "contribution",
+    "direction",
+    "abs_contribution",
+    "explanation_method"
+  ]
+}

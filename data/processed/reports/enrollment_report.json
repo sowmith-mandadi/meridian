@@ -1,0 +1,26 @@
+{
+  "dataset_name": "enrollment.csv",
+  "rows": 84,
+  "columns": 17,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "member_id",
+    "first_name",
+    "last_name",
+    "birth_date",
+    "sex",
+    "state_cd",
+    "city_name",
+    "county_nm",
+    "metro_region",
+    "zip_code",
+    "plan_type",
+    "lob",
+    "eligibility_start",
+    "eligibility_end",
+    "diabetes_flag",
+    "pcp_id",
+    "pcp_name"
+  ]
+}

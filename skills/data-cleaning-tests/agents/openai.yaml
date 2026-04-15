@@ -1,0 +1,4 @@
+interface:
+  display_name: "Cleaning Tests"
+  short_description: "Validate staged data contract"
+  default_prompt: "Use $data-cleaning-tests to run deterministic checks on staged healthcare tables."

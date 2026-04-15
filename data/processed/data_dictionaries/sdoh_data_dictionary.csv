@@ -1,0 +1,10 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+assessment_id,object,84,0,84,SDOH-001 | SDOH-002 | SDOH-003,,
+member_id,object,84,0,84,M1000 | M1001 | M1002,,
+assessment_date,object,84,0,66,2026-01-13 | 2026-02-08 | 2026-01-06,,
+transport_issue,int64,84,0,2,1 | 1 | 1,0.0,1.0
+food_issue,int64,84,0,2,0 | 0 | 0,0.0,1.0
+housing_issue,int64,84,0,2,0 | 0 | 1,0.0,1.0
+financial_issue,int64,84,0,2,0 | 0 | 1,0.0,1.0
+social_isolation,int64,84,0,2,0 | 0 | 0,0.0,1.0
+digital_access,int64,84,0,2,0 | 1 | 1,0.0,1.0

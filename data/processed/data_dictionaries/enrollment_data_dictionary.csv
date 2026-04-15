@@ -1,0 +1,18 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+member_id,object,84,0,84,M1000 | M1001 | M1002,,
+first_name,object,84,0,20,Ava | Liam | Sophia,,
+last_name,object,84,0,20,Nguyen | Garcia | Adams,,
+birth_date,object,84,0,84,1965-04-08 | 1976-10-09 | 2002-06-20,,
+sex,object,84,0,2,F | M | M,,
+state_cd,object,84,0,5,TX | FL | TX,,
+city_name,object,84,0,7,Dallas | Miami | Dallas,,
+county_nm,object,84,0,7,Dallas | Miami-Dade | Dallas,,
+metro_region,object,84,0,7,Dallas-Fort Worth | Miami Metro | Dallas-Fort Worth,,
+zip_code,int64,84,0,7,75201 | 33101 | 75201,30303.0,90012.0
+plan_type,object,84,0,3,Commercial HMO | Medicare Advantage | ACA Exchange,,
+lob,object,84,0,3,Commercial | Commercial | Exchange,,
+eligibility_start,object,84,0,79,2024-03-25 | 2025-01-16 | 2024-08-19,,
+eligibility_end,object,84,0,76,2026-08-12 | 2027-01-18 | 2026-11-05,,
+diabetes_flag,int64,84,0,2,1 | 0 | 1,0.0,1.0
+pcp_id,object,84,0,6,PCP100 | PCP101 | PCP102,,
+pcp_name,object,84,0,6,Dr. Reyes | Dr. Chen | Dr. Shah,,

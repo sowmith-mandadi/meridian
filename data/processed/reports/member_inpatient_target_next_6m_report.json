@@ -1,0 +1,20 @@
+{
+  "dataset_name": "member_inpatient_target_next_6m.csv",
+  "rows": 84,
+  "columns": 11,
+  "duplicate_rows": 0,
+  "missing_cells": 110,
+  "column_names": [
+    "member_id",
+    "eligibility_start",
+    "eligibility_end",
+    "index_date",
+    "label_window_start",
+    "label_window_end",
+    "inpatient_hospital_visit_count_next_6m",
+    "first_inpatient_hospital_visit_dt_next_6m",
+    "inpatient_hospital_visit_next_6m",
+    "days_until_first_inpatient_hospital_visit_next_6m",
+    "eligible_for_full_lookforward_window"
+  ]
+}

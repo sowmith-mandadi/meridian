@@ -1,0 +1,9 @@
+{
+  "roc_auc": 0.3979591836734694,
+  "average_precision": 0.3041267789166949,
+  "accuracy": 0.42857142857142855,
+  "brier_score": 0.4299972661016502,
+  "train_rows": 63,
+  "test_rows": 21,
+  "test_positive_rate": 0.3333333333333333
+}

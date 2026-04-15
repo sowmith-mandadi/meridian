@@ -1,0 +1,4 @@
+interface:
+  display_name: "Healthcare Data Profile"
+  short_description: "Profile healthcare tables safely"
+  default_prompt: "Use $healthcare-data-profile-clean to profile the raw or staged healthcare tables before cleaning."

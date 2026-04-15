@@ -1,0 +1,19 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+claim_num,object,236,0,236,CLM-M1000-01 | CLM-M1000-02 | CLM-M1000-03,,
+member_id,object,236,0,89,M1000 | M1000 | M1000,,
+first_name,object,236,0,20,Ava | Ava | Ava,,
+last_name,object,236,0,20,Nguyen | Nguyen | Nguyen,,
+birth_date,object,236,0,84,1965-04-08 | 1965-04-08 | 1965-04-08,,
+zip_code,int64,236,0,7,75201 | 75201 | 75201,30303.0,90012.0
+service_date,object,236,0,178,2025-09-18 | 2025-10-05 | 2025-12-18,,
+claim_type,object,236,0,5,outpatient | er | er,,
+diag_cd,object,236,0,6,Z79.84 | J44.9 | I10,,
+diag_group,object,236,0,6,Long-term medication therapy | COPD | Hypertension,,
+allowed_amt,float64,236,0,236,148.17 | 1766.93 | 983.66,57.58,22525.28
+paid_amt,float64,236,0,236,516.02 | 1354.41 | 895.37,30.06,19537.3
+place_of_service,object,236,0,5,office | emergency_room | emergency_room,,
+provider_npi,object,236,0,6,PCP100 | PCP100 | PCP100,,
+pcp_visit,int64,236,0,2,1 | 0 | 0,0.0,1.0
+er_visit,int64,236,0,2,0 | 1 | 1,0.0,1.0
+inpatient_stay,int64,236,0,2,0 | 0 | 0,0.0,1.0
+hba1c_test,int64,236,0,2,0 | 0 | 0,0.0,1.0

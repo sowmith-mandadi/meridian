@@ -1,0 +1,20 @@
+{
+  "dataset_name": "call_center.csv",
+  "rows": 96,
+  "columns": 11,
+  "duplicate_rows": 0,
+  "missing_cells": 4,
+  "column_names": [
+    "call_id",
+    "member_id",
+    "first_name",
+    "last_name",
+    "birth_date",
+    "zip_code",
+    "contact_date",
+    "reason",
+    "sentiment",
+    "issue_open",
+    "escalated"
+  ]
+}

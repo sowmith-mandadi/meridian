@@ -1,0 +1,13 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+rx_id,object,167,0,167,RX-M1000-01 | RX-M1001-01 | RX-M1001-02,,
+member_id,object,150,17,82,M1000 | M1001 | M1002,,
+first_name,object,167,0,20,Ava | Liam | Liam,,
+last_name,object,167,0,20,Nguyen | Garcia | Garcia,,
+birth_date,object,167,0,84,1965-04-08 | 1976-10-09 | 1976-10-09,,
+zip_code,int64,167,0,7,75201 | 33101 | 33101,30303.0,90012.0
+fill_date,object,167,0,104,2026-02-16 | 2026-01-08 | 2026-02-15,,
+drug_name,object,167,0,10,Jardiance | Lisinopril | Losartan,,
+drug_cls,object,167,0,10,SGLT2 | ACE Inhibitor | ARB,,
+days_supply,int64,167,0,3,30 | 60 | 30,30.0,90.0
+chronic_med,int64,167,0,1,1 | 1 | 1,1.0,1.0
+pdc,float64,167,0,136,89.1 | 94.0 | 75.2,35.1,94.9

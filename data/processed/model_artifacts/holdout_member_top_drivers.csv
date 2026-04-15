@@ -1,0 +1,64 @@
+member_id,index_date,rank,feature,feature_value,contribution,direction,abs_contribution,explanation_method
+M1019,2025-09-30,1,metro_region_phoenix metro,1.0,-2.360929932679595,decrease_risk,2.360929932679595,linear_contribution_fallback
+M1019,2025-09-30,2,lb_6m_pcp_visit_count,2.0,-1.858148517265805,decrease_risk,1.858148517265805,linear_contribution_fallback
+M1019,2025-09-30,3,lb_6m_avoidable_visit_count,1.0,1.4854932055722687,increase_risk,1.4854932055722687,linear_contribution_fallback
+M1050,2025-09-30,1,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1050,2025-09-30,2,lb_6m_er_visit_count,1.0,-1.2033671788992715,decrease_risk,1.2033671788992715,linear_contribution_fallback
+M1050,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1064,2025-09-30,1,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1064,2025-09-30,2,metro_region_atlanta metro,1.0,-1.006590709644397,decrease_risk,1.006590709644397,linear_contribution_fallback
+M1064,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1062,2025-09-30,1,lob_medicare,1.0,-2.452303156029931,decrease_risk,2.452303156029931,linear_contribution_fallback
+M1062,2025-09-30,2,metro_region_atlanta metro,1.0,-1.006590709644397,decrease_risk,1.006590709644397,linear_contribution_fallback
+M1062,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1053,2025-09-30,1,lb_6m_pcp_visit_count,3.0,-3.2193503380535455,decrease_risk,3.2193503380535455,linear_contribution_fallback
+M1053,2025-09-30,2,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1053,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1016,2025-09-30,1,metro_region_phoenix metro,1.0,-2.360929932679595,decrease_risk,2.360929932679595,linear_contribution_fallback
+M1016,2025-09-30,2,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1016,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1077,2025-09-30,1,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1077,2025-09-30,2,lb_6m_avoidable_visit_count,1.0,1.4854932055722687,increase_risk,1.4854932055722687,linear_contribution_fallback
+M1077,2025-09-30,3,lb_6m_er_visit_count,1.0,-1.2033671788992715,decrease_risk,1.2033671788992715,linear_contribution_fallback
+M1057,2025-09-30,1,lob_medicare,1.0,-2.452303156029931,decrease_risk,2.452303156029931,linear_contribution_fallback
+M1057,2025-09-30,2,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1057,2025-09-30,3,lb_6m_avoidable_visit_count,1.0,1.4854932055722687,increase_risk,1.4854932055722687,linear_contribution_fallback
+M1061,2025-09-30,1,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1061,2025-09-30,2,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1061,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1080,2025-09-30,1,lob_medicare,1.0,-2.452303156029931,decrease_risk,2.452303156029931,linear_contribution_fallback
+M1080,2025-09-30,2,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1080,2025-09-30,3,lob_exchange,0.0,-0.9249879643908281,decrease_risk,0.9249879643908281,linear_contribution_fallback
+M1043,2025-09-30,1,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1043,2025-09-30,2,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1043,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1063,2025-09-30,1,metro_region_phoenix metro,1.0,-2.360929932679595,decrease_risk,2.360929932679595,linear_contribution_fallback
+M1063,2025-09-30,2,lb_6m_er_visit_count,1.0,-1.2033671788992715,decrease_risk,1.2033671788992715,linear_contribution_fallback
+M1063,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1038,2025-09-30,1,metro_region_phoenix metro,1.0,-2.360929932679595,decrease_risk,2.360929932679595,linear_contribution_fallback
+M1038,2025-09-30,2,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1038,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1001,2025-09-30,1,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1001,2025-09-30,2,lb_6m_er_visit_count,1.0,-1.2033671788992715,decrease_risk,1.2033671788992715,linear_contribution_fallback
+M1001,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1010,2025-09-30,1,metro_region_los angeles metro,1.0,1.155510174759708,increase_risk,1.155510174759708,linear_contribution_fallback
+M1010,2025-09-30,2,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1010,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1036,2025-09-30,1,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1036,2025-09-30,2,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1036,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1049,2025-09-30,1,lb_3m_er_claim_count,2.0,-3.036966732319481,decrease_risk,3.036966732319481,linear_contribution_fallback
+M1049,2025-09-30,2,lb_6m_er_claim_count,3.0,1.549423941355029,increase_risk,1.549423941355029,linear_contribution_fallback
+M1049,2025-09-30,3,lb_6m_avoidable_visit_count,1.0,1.4854932055722687,increase_risk,1.4854932055722687,linear_contribution_fallback
+M1028,2025-09-30,1,metro_region_los angeles metro,1.0,1.155510174759708,increase_risk,1.155510174759708,linear_contribution_fallback
+M1028,2025-09-30,2,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1028,2025-09-30,3,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1069,2025-09-30,1,lb_6m_pcp_visit_count,3.0,-3.2193503380535455,decrease_risk,3.2193503380535455,linear_contribution_fallback
+M1069,2025-09-30,2,lob_medicare,1.0,-2.452303156029931,decrease_risk,2.452303156029931,linear_contribution_fallback
+M1069,2025-09-30,3,metro_region_miami metro,1.0,1.8870923121169418,increase_risk,1.8870923121169418,linear_contribution_fallback
+M1040,2025-09-30,1,lb_6m_avoidable_visit_count,1.0,1.4854932055722687,increase_risk,1.4854932055722687,linear_contribution_fallback
+M1040,2025-09-30,2,lob_exchange,1.0,1.405981705874059,increase_risk,1.405981705874059,linear_contribution_fallback
+M1040,2025-09-30,3,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1021,2025-09-30,1,lob_medicare,0.0,1.0589490901038339,increase_risk,1.0589490901038339,linear_contribution_fallback
+M1021,2025-09-30,2,lb_6m_er_visit_count,0.0,0.962693743119417,increase_risk,0.962693743119417,linear_contribution_fallback
+M1021,2025-09-30,3,lob_exchange,0.0,-0.9249879643908281,decrease_risk,0.9249879643908281,linear_contribution_fallback

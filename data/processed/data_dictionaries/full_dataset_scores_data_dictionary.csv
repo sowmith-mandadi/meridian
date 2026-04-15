@@ -1,0 +1,18 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+member_id,object,84,0,84,M1000 | M1001 | M1002,,
+index_date,object,84,0,1,2025-09-30 | 2025-09-30 | 2025-09-30,,
+predicted_probability,float64,84,0,84,0.3488521651126731 | 0.0546989377540811 | 0.0912022658517008,7.919257525174654e-05,0.9983189716348544
+actual,int64,84,0,2,1 | 0 | 0,0.0,1.0
+top_driver_1_feature,object,84,0,10,lob_medicare | metro_region_miami metro | lb_6m_avoidable_visit_count,,
+top_driver_1_value,float64,84,0,5,0.0 | 1.0 | 1.0,0.0,17529.74
+top_driver_1_contribution,float64,84,0,13,1.058949090103834 | 1.8870923121169416 | 1.4854932055722687,-3.219350338053545,3.565183693373445
+top_driver_1_direction,object,84,0,2,increase_risk | increase_risk | increase_risk,,
+top_driver_2_feature,object,84,0,12,lb_6m_er_visit_count | lb_6m_er_visit_count | lob_exchange,,
+top_driver_2_value,float64,84,0,5,0.0 | 1.0 | 1.0,0.0,20454.22
+top_driver_2_contribution,float64,84,0,14,0.962693743119417 | -1.2033671788992717 | 1.405981705874059,-2.452303156029931,2.8418765321398736
+top_driver_2_direction,object,84,0,2,increase_risk | decrease_risk | increase_risk,,
+top_driver_3_feature,object,84,0,11,lob_exchange | lob_medicare | lb_6m_er_visit_count,,
+top_driver_3_value,float64,84,0,4,0.0 | 0.0 | 1.0,0.0,22190.62
+top_driver_3_contribution,float64,84,0,13,-0.924987964390828 | 1.058949090103834 | -1.2033671788992717,-1.2033671788992717,2.7648049159816885
+top_driver_3_direction,object,84,0,2,decrease_risk | increase_risk | decrease_risk,,
+explanation_method,object,84,0,1,linear_contribution_fallback | linear_contribution_fallback | linear_contribution_fallback,,

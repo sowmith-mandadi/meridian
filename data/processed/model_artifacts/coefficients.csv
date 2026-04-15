@@ -1,0 +1,60 @@
+feature,coefficient
+lob_exchange,1.1495617526348265
+lb_6m_avoidable_visit_count,1.0180532866614564
+metro_region_miami metro,0.7765902793387599
+plan_type_commercial hmo,0.49908990099733386
+lb_6m_paid_amt_sum,0.46817228241967995
+lob_commercial,0.3989857523214596
+sex_f,0.37963484390977115
+lb_3m_paid_amt_sum,0.37554187134505057
+lb_3m_inpatient_visit_count,0.37073665593872823
+metro_region_los angeles metro,0.34199456899214464
+lb_6m_er_claim_count,0.3412193047427611
+metro_region_orlando metro,0.29309666990651523
+lb_3m_er_visit_count,0.2538289423666148
+metro_region_houston metro,0.20883714611239185
+lb_3m_inpatient_claim_flag_sum,0.20830908784919855
+lb_6m_inpatient_claim_flag_sum,0.2066348619477246
+lb_3m_los_sum,0.2056940611127879
+lb_3m_claim_count,0.16360483148488453
+lb_6m_los_sum,0.16230624713953162
+lb_3m_observation_visit_count,0.13694026855523278
+plan_type_aca exchange,0.03508747785663592
+lb_6m_claim_count,0.020776409304425505
+lb_3m_negative_sentiment_count,0.0
+lb_3m_rx_fill_count,0.0
+lb_3m_open_issue_count,0.0
+lb_3m_call_count,0.0
+lb_3m_escalated_count,0.0
+lb_6m_escalated_count,0.0
+social_isolation,0.0
+housing_issue,0.0
+financial_issue,0.0
+transport_issue,0.0
+lb_6m_negative_sentiment_count,0.0
+lb_6m_open_issue_count,0.0
+food_issue,0.0
+lb_3m_unique_drug_class_count,0.0
+lb_3m_avg_pdc,0.0
+lb_3m_chronic_med_fill_count,0.0
+lb_6m_rx_fill_count,0.0
+lb_6m_unique_drug_class_count,0.0
+lb_6m_avg_pdc,0.0
+lb_6m_call_count,0.0
+lb_6m_chronic_med_fill_count,0.0
+digital_access,0.0
+lb_3m_pcp_visit_count,-0.09899833054139164
+age_at_index,-0.11220148366532957
+lb_6m_inpatient_visit_count,-0.24787524445803105
+diabetes_flag,-0.26148168674798256
+sex_m,-0.3796348439097714
+lb_6m_observation_visit_count,-0.41314103896082294
+metro_region_atlanta metro,-0.4666830402828253
+metro_region_dallas-fort worth,-0.46858585912355616
+lb_3m_avoidable_visit_count,-0.47612459392386414
+plan_type_medicare advantage,-0.4942339832124581
+lb_3m_er_claim_count,-0.5518946003827042
+metro_region_phoenix metro,-0.6196714938296584
+lb_6m_pcp_visit_count,-0.8916479368707722
+lb_6m_er_visit_count,-1.084969639752878
+lob_medicare,-1.6244226981052394

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Tabular Preprocessing"
+  short_description: "Plan preprocessing for modeling"
+  default_prompt: "Use $tabular-preprocessing to generate a deterministic preprocessing plan for the feature table."

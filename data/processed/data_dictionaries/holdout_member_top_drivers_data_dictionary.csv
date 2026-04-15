@@ -1,0 +1,10 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+member_id,object,63,0,21,M1019 | M1019 | M1019,,
+index_date,object,63,0,1,2025-09-30 | 2025-09-30 | 2025-09-30,,
+rank,int64,63,0,3,1 | 2 | 3,1.0,3.0
+feature,object,63,0,11,metro_region_phoenix metro | lb_6m_pcp_visit_count | lb_6m_avoidable_visit_count,,
+feature_value,float64,63,0,4,1.0 | 2.0 | 1.0,0.0,3.0
+contribution,float64,63,0,15,-2.360929932679595 | -1.858148517265805 | 1.4854932055722687,-3.219350338053545,1.8870923121169416
+direction,object,63,0,2,decrease_risk | decrease_risk | increase_risk,,
+abs_contribution,float64,63,0,15,2.360929932679595 | 1.858148517265805 | 1.4854932055722687,0.924987964390828,3.219350338053545
+explanation_method,object,63,0,1,linear_contribution_fallback | linear_contribution_fallback | linear_contribution_fallback,,

@@ -1,0 +1,12 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+member_id,object,84,0,84,M1000 | M1001 | M1002,,
+eligibility_start,object,84,0,79,2024-03-25 | 2025-01-16 | 2024-08-19,,
+eligibility_end,object,84,0,76,2026-08-12 | 2027-01-18 | 2026-11-05,,
+index_date,object,84,0,1,2025-09-30 | 2025-09-30 | 2025-09-30,,
+label_window_start,object,84,0,1,2025-10-01 | 2025-10-01 | 2025-10-01,,
+label_window_end,object,84,0,1,2026-03-31 | 2026-03-31 | 2026-03-31,,
+inpatient_hospital_visit_count_next_6m,int64,84,0,3,2 | 0 | 0,0.0,2.0
+first_inpatient_hospital_visit_dt_next_6m,object,29,55,27,2025-11-25 | 2026-01-26 | 2025-12-23,,
+inpatient_hospital_visit_next_6m,int64,84,0,2,1 | 0 | 0,0.0,1.0
+days_until_first_inpatient_hospital_visit_next_6m,float64,29,55,27,56.0 | 118.0 | 84.0,8.0,180.0
+eligible_for_full_lookforward_window,int64,84,0,1,1 | 1 | 1,1.0,1.0

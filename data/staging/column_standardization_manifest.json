@@ -1,0 +1,242 @@
+{
+  "files": [
+    {
+      "file_name": "call_center.csv",
+      "original_columns": [
+        "call_id",
+        "member_ref",
+        "first_nm",
+        "last_nm",
+        "birth_dt",
+        "zip_cd",
+        "contact_dt",
+        "reason",
+        "sentiment",
+        "issue_open",
+        "escalated"
+      ],
+      "standardized_columns": [
+        "call_id",
+        "member_id",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "zip_code",
+        "contact_date",
+        "reason",
+        "sentiment",
+        "issue_open",
+        "escalated"
+      ],
+      "rows_written": 96
+    },
+    {
+      "file_name": "claims.csv",
+      "original_columns": [
+        "claim_num",
+        "member_key",
+        "fname",
+        "lname",
+        "birth_date",
+        "zip_cd",
+        "svc_dt",
+        "claim_type",
+        "diag_cd",
+        "diag_group",
+        "allowed_amt",
+        "paid_amt",
+        "place_of_service",
+        "provider_npi",
+        "pcp_visit",
+        "er_visit",
+        "inpatient_stay",
+        "hba1c_test"
+      ],
+      "standardized_columns": [
+        "claim_num",
+        "member_id",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "zip_code",
+        "service_date",
+        "claim_type",
+        "diag_cd",
+        "diag_group",
+        "allowed_amt",
+        "paid_amt",
+        "place_of_service",
+        "provider_npi",
+        "pcp_visit",
+        "er_visit",
+        "inpatient_stay",
+        "hba1c_test"
+      ],
+      "rows_written": 236
+    },
+    {
+      "file_name": "enrollment.csv",
+      "original_columns": [
+        "MemberID",
+        "first_nm",
+        "last_nm",
+        "dob",
+        "sex",
+        "state_cd",
+        "city_name",
+        "county_nm",
+        "metro_region",
+        "zip",
+        "plan_type",
+        "lob",
+        "eligibility_start",
+        "eligibility_end",
+        "diabetes_flag",
+        "pcp_id",
+        "pcp_name"
+      ],
+      "standardized_columns": [
+        "member_id",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "sex",
+        "state_cd",
+        "city_name",
+        "county_nm",
+        "metro_region",
+        "zip_code",
+        "plan_type",
+        "lob",
+        "eligibility_start",
+        "eligibility_end",
+        "diabetes_flag",
+        "pcp_id",
+        "pcp_name"
+      ],
+      "rows_written": 84
+    },
+    {
+      "file_name": "member_inpatient_target_next_6m.csv",
+      "original_columns": [
+        "member_id",
+        "index_date",
+        "label_window_start",
+        "label_window_end",
+        "eligibility_start",
+        "eligibility_end",
+        "eligible_for_full_lookforward_window",
+        "inpatient_hospital_visit_next_6m",
+        "inpatient_hospital_visit_count_next_6m",
+        "first_inpatient_hospital_visit_dt_next_6m",
+        "days_until_first_inpatient_hospital_visit_next_6m"
+      ],
+      "standardized_columns": [
+        "member_id",
+        "index_date",
+        "label_window_start",
+        "label_window_end",
+        "eligibility_start",
+        "eligibility_end",
+        "eligible_for_full_lookforward_window",
+        "inpatient_hospital_visit_next_6m",
+        "inpatient_hospital_visit_count_next_6m",
+        "first_inpatient_hospital_visit_dt_next_6m",
+        "days_until_first_inpatient_hospital_visit_next_6m"
+      ],
+      "rows_written": 84
+    },
+    {
+      "file_name": "pharmacy.csv",
+      "original_columns": [
+        "rx_id",
+        "member_identifier",
+        "first_nm",
+        "last_nm",
+        "birth_dt",
+        "zip_cd",
+        "fill_dt",
+        "drug_name",
+        "drug_cls",
+        "days_supply",
+        "chronic_med",
+        "pdc"
+      ],
+      "standardized_columns": [
+        "rx_id",
+        "member_id",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "zip_code",
+        "fill_date",
+        "drug_name",
+        "drug_cls",
+        "days_supply",
+        "chronic_med",
+        "pdc"
+      ],
+      "rows_written": 167
+    },
+    {
+      "file_name": "sdoh.csv",
+      "original_columns": [
+        "assessment_id",
+        "member_id",
+        "assess_dt",
+        "transport_issue",
+        "food_issue",
+        "housing_issue",
+        "financial_issue",
+        "social_isolation",
+        "digital_access"
+      ],
+      "standardized_columns": [
+        "assessment_id",
+        "member_id",
+        "assessment_date",
+        "transport_issue",
+        "food_issue",
+        "housing_issue",
+        "financial_issue",
+        "social_isolation",
+        "digital_access"
+      ],
+      "rows_written": 84
+    },
+    {
+      "file_name": "utilization.csv",
+      "original_columns": [
+        "util_id",
+        "member_number",
+        "first_nm",
+        "last_nm",
+        "birth_dt",
+        "zip_cd",
+        "event_dt",
+        "visit_type",
+        "admit_src",
+        "los",
+        "avoidable",
+        "discharge_status",
+        "provider_npi"
+      ],
+      "standardized_columns": [
+        "util_id",
+        "member_id",
+        "first_name",
+        "last_name",
+        "birth_date",
+        "zip_code",
+        "event_date",
+        "visit_type",
+        "admit_src",
+        "los",
+        "avoidable",
+        "discharge_status",
+        "provider_npi"
+      ],
+      "rows_written": 311
+    }
+  ]
+}

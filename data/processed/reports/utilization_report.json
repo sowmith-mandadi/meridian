@@ -1,0 +1,22 @@
+{
+  "dataset_name": "utilization.csv",
+  "rows": 311,
+  "columns": 13,
+  "duplicate_rows": 0,
+  "missing_cells": 29,
+  "column_names": [
+    "util_id",
+    "member_id",
+    "first_name",
+    "last_name",
+    "birth_date",
+    "zip_code",
+    "event_date",
+    "visit_type",
+    "admit_src",
+    "los",
+    "avoidable",
+    "discharge_status",
+    "provider_npi"
+  ]
+}

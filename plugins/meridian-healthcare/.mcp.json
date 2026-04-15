@@ -1,8 +1,0 @@
-{
-  "servers": {
-    "meridian": {
-      "url": "https://meridian-two-drab.vercel.app/api/mcp/mcp",
-      "description": "Meridian Healthcare Intelligence — remote MCP (Streamable HTTP). Cohort queries, risk analysis, outreach, charts, pipeline, and governed A2A access with role-based masking and audit logging."
-    }
-  }
-}

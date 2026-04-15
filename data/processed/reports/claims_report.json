@@ -1,0 +1,27 @@
+{
+  "dataset_name": "claims.csv",
+  "rows": 236,
+  "columns": 18,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "claim_num",
+    "member_id",
+    "first_name",
+    "last_name",
+    "birth_date",
+    "zip_code",
+    "service_date",
+    "claim_type",
+    "diag_cd",
+    "diag_group",
+    "allowed_amt",
+    "paid_amt",
+    "place_of_service",
+    "provider_npi",
+    "pcp_visit",
+    "er_visit",
+    "inpatient_stay",
+    "hba1c_test"
+  ]
+}

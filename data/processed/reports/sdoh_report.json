@@ -1,0 +1,18 @@
+{
+  "dataset_name": "sdoh.csv",
+  "rows": 84,
+  "columns": 9,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "assessment_id",
+    "member_id",
+    "assessment_date",
+    "transport_issue",
+    "food_issue",
+    "housing_issue",
+    "financial_issue",
+    "social_isolation",
+    "digital_access"
+  ]
+}

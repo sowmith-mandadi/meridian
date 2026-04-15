@@ -1,0 +1,4 @@
+interface:
+  display_name: "Pytest Data Quality"
+  short_description: "Run data quality test suite"
+  default_prompt: "Use $pytest-data-quality-suite to run or extend the pytest suite for data cleaning and approval gating."

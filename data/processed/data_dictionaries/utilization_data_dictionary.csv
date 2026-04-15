@@ -1,0 +1,14 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+util_id,object,311,0,311,UTIL-M1000-01 | UTIL-M1000-02 | UTIL-M1000-03,,
+member_id,object,282,29,81,M1000 | M1000 | M1000,,
+first_name,object,311,0,20,Ava | Ava | Ava,,
+last_name,object,311,0,19,Nguyen | Nguyen | Nguyen,,
+birth_date,object,311,0,82,1965-04-08 | 1965-04-08 | 1965-04-08,,
+zip_code,int64,311,0,7,75201 | 75201 | 75201,30303.0,90012.0
+event_date,object,311,0,205,2026-02-16 | 2025-11-25 | 2026-01-23,,
+visit_type,object,311,0,4,ER | INPATIENT | INPATIENT,,
+admit_src,object,311,0,3,specialist_referral | specialist_referral | specialist_referral,,
+los,int64,311,0,8,0 | 3 | 7,0.0,7.0
+avoidable,int64,311,0,2,0 | 0 | 0,0.0,1.0
+discharge_status,object,311,0,3,home_with_services | home_with_services | home,,
+provider_npi,object,311,0,6,PCP100 | PCP100 | PCP100,,

@@ -1,0 +1,26 @@
+{
+  "dataset_name": "full_dataset_scores.csv",
+  "rows": 84,
+  "columns": 17,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "member_id",
+    "index_date",
+    "predicted_probability",
+    "actual",
+    "top_driver_1_feature",
+    "top_driver_1_value",
+    "top_driver_1_contribution",
+    "top_driver_1_direction",
+    "top_driver_2_feature",
+    "top_driver_2_value",
+    "top_driver_2_contribution",
+    "top_driver_2_direction",
+    "top_driver_3_feature",
+    "top_driver_3_value",
+    "top_driver_3_contribution",
+    "top_driver_3_direction",
+    "explanation_method"
+  ]
+}

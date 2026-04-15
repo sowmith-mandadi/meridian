@@ -1,0 +1,118 @@
+{
+  "exclude": [
+    "member_id",
+    "index_date"
+  ],
+  "numeric": {
+    "age_at_index": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_claim_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_paid_amt_sum": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_er_claim_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_pcp_visit_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_inpatient_visit_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_3m_los_sum": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_claim_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_paid_amt_sum": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_er_claim_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_pcp_visit_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_inpatient_visit_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_los_sum": {
+      "scaling": "standardize",
+      "imputation": "median"
+    },
+    "lb_6m_avoidable_visit_count": {
+      "scaling": "standardize",
+      "imputation": "median"
+    }
+  },
+  "categorical": {
+    "sex": {
+      "cleanup": "strip_lower",
+      "encoding": "one_hot",
+      "imputation": "unknown"
+    },
+    "plan_type": {
+      "cleanup": "strip_lower",
+      "encoding": "one_hot",
+      "imputation": "unknown"
+    },
+    "lob": {
+      "cleanup": "strip_lower",
+      "encoding": "one_hot",
+      "imputation": "unknown"
+    },
+    "metro_region": {
+      "cleanup": "strip_lower",
+      "encoding": "one_hot",
+      "imputation": "unknown"
+    }
+  },
+  "binary": [
+    "diabetes_flag",
+    "lb_3m_inpatient_claim_flag_sum",
+    "lb_3m_er_visit_count",
+    "lb_3m_observation_visit_count",
+    "lb_3m_avoidable_visit_count",
+    "lb_3m_rx_fill_count",
+    "lb_3m_chronic_med_fill_count",
+    "lb_3m_avg_pdc",
+    "lb_3m_unique_drug_class_count",
+    "lb_3m_call_count",
+    "lb_3m_escalated_count",
+    "lb_3m_open_issue_count",
+    "lb_3m_negative_sentiment_count",
+    "lb_6m_inpatient_claim_flag_sum",
+    "lb_6m_er_visit_count",
+    "lb_6m_observation_visit_count",
+    "lb_6m_rx_fill_count",
+    "lb_6m_chronic_med_fill_count",
+    "lb_6m_avg_pdc",
+    "lb_6m_unique_drug_class_count",
+    "lb_6m_call_count",
+    "lb_6m_escalated_count",
+    "lb_6m_open_issue_count",
+    "lb_6m_negative_sentiment_count",
+    "transport_issue",
+    "food_issue",
+    "housing_issue",
+    "financial_issue",
+    "social_isolation",
+    "digital_access"
+  ]
+}

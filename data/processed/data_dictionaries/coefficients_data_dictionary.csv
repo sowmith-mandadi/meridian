@@ -1,0 +1,3 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+feature,object,59,0,59,lob_exchange | lb_6m_avoidable_visit_count | metro_region_miami metro,,
+coefficient,float64,59,0,38,1.1495617526348263 | 1.0180532866614564 | 0.7765902793387599,-1.6244226981052394,1.1495617526348263

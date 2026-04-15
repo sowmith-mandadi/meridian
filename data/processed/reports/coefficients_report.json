@@ -1,0 +1,11 @@
+{
+  "dataset_name": "coefficients.csv",
+  "rows": 59,
+  "columns": 2,
+  "duplicate_rows": 0,
+  "missing_cells": 0,
+  "column_names": [
+    "feature",
+    "coefficient"
+  ]
+}

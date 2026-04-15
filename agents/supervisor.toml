@@ -1,0 +1,12 @@
+name = "supervisor"
+role = "workflow_orchestrator"
+goal = "Coordinate the end-to-end inpatient risk pipeline, enforce tech specs approval, and delegate to specialist agents."
+uses_skills = ["inpatient-risk-pipeline", "pytest-data-quality-suite"]
+inputs = ["AGENTS.md", "tech_spcs.yml", "data/raw"]
+outputs = ["data/staging", "data/processed", "data/processed/reports", "data/processed/data_dictionaries"]
+handoffs_to = ["data-prep", "feature-builder", "model-evaluator", "qa-validator"]
+guardrails = [
+  "Do not allow final data creation when final_data_approved is false.",
+  "Use specialist agents for domain-specific steps.",
+  "Require validation artifacts before marking the run complete."
+]

@@ -1,0 +1,12 @@
+column_name,dtype,non_null_count,missing_count,unique_count,sample_values,min,max
+call_id,object,96,0,96,CALL-M1000-01 | CALL-M1000-02 | CALL-M1002-01,,
+member_id,object,92,4,52,M1000 | M1000 | M1002,,
+first_name,object,96,0,20,Ava | Ava | Sophia,,
+last_name,object,96,0,17,Nguyen | Nguyen | Adams,,
+birth_date,object,96,0,53,1965-04-08 | 1965-04-08 | 2002-06-20,,
+zip_code,int64,96,0,7,75201 | 75201 | 75201,30303.0,90012.0
+contact_date,object,96,0,77,2026-02-22 | 2026-03-01 | 2026-03-13,,
+reason,object,96,0,6,transportation_support | transportation_support | benefit_question,,
+sentiment,object,96,0,3,neutral | neutral | positive,,
+issue_open,int64,96,0,2,0 | 0 | 0,0.0,1.0
+escalated,int64,96,0,2,0 | 0 | 0,0.0,1.0

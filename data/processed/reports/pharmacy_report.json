@@ -1,0 +1,21 @@
+{
+  "dataset_name": "pharmacy.csv",
+  "rows": 167,
+  "columns": 12,
+  "duplicate_rows": 0,
+  "missing_cells": 17,
+  "column_names": [
+    "rx_id",
+    "member_id",
+    "first_name",
+    "last_name",
+    "birth_date",
+    "zip_code",
+    "fill_date",
+    "drug_name",
+    "drug_cls",
+    "days_supply",
+    "chronic_med",
+    "pdc"
+  ]
+}

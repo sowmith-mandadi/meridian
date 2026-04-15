@@ -1,0 +1,85 @@
+member_id,first_name,last_name,birth_date,sex,state_cd,city_name,county_nm,metro_region,zip_code,plan_type,lob,eligibility_start,eligibility_end,diabetes_flag,pcp_id,pcp_name
+M1000,Ava,Nguyen,1965-04-08,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Commercial HMO,Commercial,2024-03-25,2026-08-12,1,PCP100,Dr. Reyes
+M1001,Liam,Garcia,1976-10-09,M,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Commercial,2025-01-16,2027-01-18,0,PCP101,Dr. Chen
+M1002,Sophia,Adams,2002-06-20,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Exchange,2024-08-19,2026-11-05,1,PCP102,Dr. Shah
+M1003,Noah,Flores,1972-05-15,M,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Exchange,2023-10-31,2026-09-04,0,PCP103,Dr. Robinson
+M1004,Mia,Clark,1968-01-08,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Commercial HMO,Exchange,2024-03-31,2027-02-17,0,PCP104,Dr. Brooks
+M1005,Elijah,Allen,1985-07-19,F,TX,Houston,Harris,Houston Metro,77002,Commercial HMO,Commercial,2023-11-21,2026-10-19,1,PCP105,Dr. Allen
+M1006,Isabella,Young,1972-07-20,F,FL,Orlando,Orange,Orlando Metro,32801,ACA Exchange,Exchange,2025-04-29,2027-04-30,0,PCP100,Dr. Reyes
+M1007,Lucas,Young,1975-03-15,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Medicare,2023-11-09,2027-04-15,1,PCP101,Dr. Chen
+M1008,Emma,Anderson,1958-09-25,F,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Medicare,2024-12-22,2026-08-28,0,PCP102,Dr. Shah
+M1009,Mason,Martinez,1953-12-16,M,AZ,Phoenix,Maricopa,Phoenix Metro,85004,ACA Exchange,Commercial,2024-11-26,2027-04-26,0,PCP103,Dr. Robinson
+M1010,Olivia,Flores,1973-11-21,F,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,Medicare Advantage,Commercial,2023-12-31,2026-11-24,0,PCP104,Dr. Brooks
+M1011,Ethan,Wright,1988-01-08,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Exchange,2024-01-12,2027-03-29,1,PCP105,Dr. Allen
+M1012,Charlotte,Young,1960-02-04,F,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Exchange,2023-11-02,2026-09-18,0,PCP100,Dr. Reyes
+M1013,James,Clark,1954-04-07,F,GA,Atlanta,Fulton,Atlanta Metro,30303,Medicare Advantage,Exchange,2025-05-16,2026-08-24,1,PCP101,Dr. Chen
+M1014,Amelia,Baker,1953-04-06,F,GA,Atlanta,Fulton,Atlanta Metro,30303,Medicare Advantage,Commercial,2024-07-21,2026-12-12,0,PCP102,Dr. Shah
+M1015,Benjamin,Baker,1992-12-26,F,TX,Houston,Harris,Houston Metro,77002,ACA Exchange,Medicare,2025-06-27,2026-08-24,1,PCP103,Dr. Robinson
+M1016,Harper,Brown,1981-03-02,F,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Medicare Advantage,Commercial,2024-01-19,2026-12-03,0,PCP104,Dr. Brooks
+M1017,Logan,Allen,1974-11-19,M,FL,Orlando,Orange,Orlando Metro,32801,Medicare Advantage,Commercial,2023-11-03,2026-12-30,1,PCP105,Dr. Allen
+M1018,Evelyn,Flores,1987-10-04,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Commercial,2024-06-02,2027-05-04,1,PCP100,Dr. Reyes
+M1019,Daniel,Flores,1999-11-17,F,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Medicare Advantage,Commercial,2025-05-07,2026-10-17,1,PCP101,Dr. Chen
+M1020,Ava,Baker,1969-04-22,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Medicare,2024-11-14,2026-08-21,0,PCP102,Dr. Shah
+M1021,Liam,Lee,1964-03-24,F,FL,Orlando,Orange,Orlando Metro,32801,ACA Exchange,Commercial,2024-08-11,2026-10-13,1,PCP103,Dr. Robinson
+M1022,Sophia,Lee,1961-11-08,F,GA,Atlanta,Fulton,Atlanta Metro,30303,Commercial HMO,Commercial,2025-02-24,2027-02-26,0,PCP104,Dr. Brooks
+M1023,Noah,Baker,1974-11-28,M,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,Commercial HMO,Medicare,2025-01-09,2026-11-09,0,PCP105,Dr. Allen
+M1024,Mia,Taylor,2000-04-08,M,TX,Houston,Harris,Houston Metro,77002,Medicare Advantage,Exchange,2024-03-21,2027-02-19,1,PCP100,Dr. Reyes
+M1025,Elijah,Allen,1949-02-09,M,TX,Houston,Harris,Houston Metro,77002,Medicare Advantage,Exchange,2024-03-19,2026-09-27,1,PCP101,Dr. Chen
+M1026,Isabella,Torres,1995-12-22,F,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,ACA Exchange,Medicare,2024-03-23,2027-01-04,1,PCP102,Dr. Shah
+M1027,Lucas,Young,1966-09-05,M,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Exchange,2025-08-24,2027-01-01,1,PCP103,Dr. Robinson
+M1028,Emma,Green,1986-11-11,F,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,ACA Exchange,Commercial,2024-11-07,2027-04-19,0,PCP104,Dr. Brooks
+M1029,Mason,Taylor,2000-04-22,F,TX,Houston,Harris,Houston Metro,77002,Medicare Advantage,Medicare,2023-11-19,2026-11-06,1,PCP105,Dr. Allen
+M1030,Olivia,Wright,1962-03-26,F,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,Medicare Advantage,Commercial,2024-05-06,2027-04-27,0,PCP100,Dr. Reyes
+M1031,Ethan,Allen,1996-08-20,M,TX,Houston,Harris,Houston Metro,77002,Commercial HMO,Exchange,2024-04-25,2027-03-17,0,PCP101,Dr. Chen
+M1032,Charlotte,Nguyen,1965-09-16,M,GA,Atlanta,Fulton,Atlanta Metro,30303,Medicare Advantage,Medicare,2024-02-18,2026-09-09,0,PCP102,Dr. Shah
+M1033,James,Taylor,1957-12-07,M,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Exchange,2025-08-04,2027-02-09,1,PCP103,Dr. Robinson
+M1034,Amelia,Wright,1972-07-18,F,TX,Houston,Harris,Houston Metro,77002,Medicare Advantage,Medicare,2024-04-14,2026-08-13,0,PCP104,Dr. Brooks
+M1035,Benjamin,Clark,1982-01-13,M,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Commercial HMO,Commercial,2024-12-01,2027-02-09,0,PCP105,Dr. Allen
+M1036,Harper,Johnson,1996-07-09,F,TX,Houston,Harris,Houston Metro,77002,ACA Exchange,Exchange,2025-07-02,2027-01-25,0,PCP100,Dr. Reyes
+M1037,Logan,Adams,1949-10-05,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Commercial HMO,Exchange,2023-12-12,2026-09-26,1,PCP101,Dr. Chen
+M1038,Evelyn,Baker,1954-10-01,F,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Commercial HMO,Exchange,2023-11-21,2026-12-01,0,PCP102,Dr. Shah
+M1039,Daniel,Taylor,1986-02-26,M,GA,Atlanta,Fulton,Atlanta Metro,30303,Commercial HMO,Exchange,2023-10-31,2027-01-20,0,PCP103,Dr. Robinson
+M1040,Ava,Wright,1954-07-12,M,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Exchange,2024-04-16,2027-03-25,0,PCP104,Dr. Brooks
+M1041,Liam,Patel,2002-04-27,M,TX,Houston,Harris,Houston Metro,77002,Medicare Advantage,Commercial,2024-04-05,2027-01-12,0,PCP105,Dr. Allen
+M1042,Sophia,Allen,1964-06-09,F,TX,Houston,Harris,Houston Metro,77002,Commercial HMO,Commercial,2024-07-04,2027-04-06,0,PCP100,Dr. Reyes
+M1043,Noah,Clark,1962-07-23,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Exchange,2024-05-17,2026-12-15,1,PCP101,Dr. Chen
+M1044,Mia,Baker,1960-06-04,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Exchange,2024-03-05,2026-12-21,0,PCP102,Dr. Shah
+M1045,Elijah,Allen,1950-01-18,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Medicare,2024-05-30,2027-01-20,1,PCP103,Dr. Robinson
+M1046,Isabella,Baker,1978-02-27,M,TX,Houston,Harris,Houston Metro,77002,Commercial HMO,Commercial,2025-04-25,2027-02-28,1,PCP104,Dr. Brooks
+M1047,Lucas,Garcia,1981-07-15,F,TX,Houston,Harris,Houston Metro,77002,ACA Exchange,Exchange,2025-05-15,2026-11-13,0,PCP105,Dr. Allen
+M1048,Emma,Allen,1958-04-06,M,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,Medicare Advantage,Commercial,2024-12-30,2026-12-24,0,PCP100,Dr. Reyes
+M1049,Mason,Patel,1962-05-26,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Commercial,2024-11-25,2026-10-10,0,PCP101,Dr. Chen
+M1050,Olivia,Baker,1977-12-10,F,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Commercial,2024-06-08,2027-01-11,0,PCP102,Dr. Shah
+M1051,Ethan,Wright,1991-10-19,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Exchange,2023-10-27,2027-03-13,0,PCP103,Dr. Robinson
+M1052,Charlotte,Patel,1975-11-27,F,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Commercial HMO,Medicare,2024-06-29,2027-04-09,0,PCP104,Dr. Brooks
+M1053,James,Young,1983-01-15,F,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Exchange,2024-05-08,2027-02-26,1,PCP105,Dr. Allen
+M1054,Amelia,Adams,1996-08-21,M,FL,Miami,Miami-Dade,Miami Metro,33101,Commercial HMO,Commercial,2023-11-18,2026-11-29,1,PCP100,Dr. Reyes
+M1055,Benjamin,Anderson,1955-11-27,M,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Commercial,2024-05-14,2026-10-12,1,PCP101,Dr. Chen
+M1056,Harper,Lee,1956-02-09,M,FL,Miami,Miami-Dade,Miami Metro,33101,Commercial HMO,Medicare,2024-10-23,2027-04-06,0,PCP102,Dr. Shah
+M1057,Logan,Martinez,1970-06-18,F,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Medicare,2024-12-28,2027-02-25,0,PCP103,Dr. Robinson
+M1058,Evelyn,Clark,1999-07-13,F,CA,Los Angeles,Los Angeles,Los Angeles Metro,90012,Commercial HMO,Exchange,2023-12-29,2027-01-15,0,PCP104,Dr. Brooks
+M1059,Daniel,Patel,1989-03-03,M,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Exchange,2024-07-31,2027-01-08,1,PCP105,Dr. Allen
+M1060,Ava,Torres,1950-10-03,F,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Exchange,2025-05-14,2027-03-14,1,PCP100,Dr. Reyes
+M1061,Liam,Scott,1957-04-17,M,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Exchange,2024-12-21,2027-04-10,1,PCP101,Dr. Chen
+M1062,Sophia,Taylor,1977-05-22,M,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Medicare,2024-12-11,2027-03-20,0,PCP102,Dr. Shah
+M1063,Noah,Torres,2002-08-04,M,AZ,Phoenix,Maricopa,Phoenix Metro,85004,Medicare Advantage,Commercial,2024-01-23,2026-08-24,1,PCP103,Dr. Robinson
+M1064,Mia,Lee,1966-04-20,F,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Commercial,2023-11-21,2026-08-19,0,PCP104,Dr. Brooks
+M1065,Elijah,Clark,1971-12-05,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,ACA Exchange,Exchange,2024-11-18,2026-10-22,1,PCP105,Dr. Allen
+M1066,Isabella,Anderson,1977-02-05,M,GA,Atlanta,Fulton,Atlanta Metro,30303,ACA Exchange,Medicare,2025-05-24,2027-02-17,0,PCP100,Dr. Reyes
+M1067,Lucas,Adams,1971-11-24,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Commercial,2023-11-29,2027-01-13,0,PCP101,Dr. Chen
+M1068,Emma,Young,1988-08-23,M,FL,Orlando,Orange,Orlando Metro,32801,Commercial HMO,Commercial,2024-12-27,2027-05-01,1,PCP102,Dr. Shah
+M1069,Mason,Patel,1995-12-18,M,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Medicare,2024-11-11,2026-08-15,1,PCP103,Dr. Robinson
+M1070,Olivia,Flores,1963-06-04,F,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Medicare,2025-02-11,2026-09-30,0,PCP104,Dr. Brooks
+M1071,Ethan,Lee,1961-11-21,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Commercial HMO,Exchange,2025-01-24,2026-11-17,0,PCP105,Dr. Allen
+M1072,Charlotte,Nguyen,1957-10-01,F,TX,Houston,Harris,Houston Metro,77002,ACA Exchange,Commercial,2025-04-12,2026-08-06,1,PCP100,Dr. Reyes
+M1073,James,Taylor,1949-03-09,M,FL,Orlando,Orange,Orlando Metro,32801,ACA Exchange,Exchange,2025-05-05,2027-03-18,1,PCP101,Dr. Chen
+M1074,Amelia,Patel,1998-11-17,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Exchange,2024-05-27,2026-09-05,1,PCP102,Dr. Shah
+M1075,Benjamin,Torres,1952-03-09,M,FL,Orlando,Orange,Orlando Metro,32801,Medicare Advantage,Exchange,2023-12-14,2027-03-07,0,PCP103,Dr. Robinson
+M1076,Harper,Young,1989-09-24,M,GA,Atlanta,Fulton,Atlanta Metro,30303,Medicare Advantage,Medicare,2025-05-19,2027-01-06,0,PCP104,Dr. Brooks
+M1077,Logan,Baker,1957-11-16,F,FL,Miami,Miami-Dade,Miami Metro,33101,ACA Exchange,Commercial,2024-01-02,2027-01-14,1,PCP105,Dr. Allen
+M1078,Evelyn,Torres,1986-05-12,M,AZ,Phoenix,Maricopa,Phoenix Metro,85004,ACA Exchange,Medicare,2025-04-29,2026-12-19,1,PCP100,Dr. Reyes
+M1079,Daniel,Hall,1997-10-20,M,GA,Atlanta,Fulton,Atlanta Metro,30303,Commercial HMO,Commercial,2024-11-18,2027-01-04,0,PCP101,Dr. Chen
+M1080,Ava,Young,1957-10-22,M,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Medicare,2025-03-16,2027-02-04,1,PCP102,Dr. Shah
+M1081,Liam,Lee,1987-01-22,F,TX,Dallas,Dallas,Dallas-Fort Worth,75201,Medicare Advantage,Medicare,2025-05-03,2026-12-22,1,PCP103,Dr. Robinson
+M1082,Sophia,Brown,1990-05-02,F,FL,Miami,Miami-Dade,Miami Metro,33101,Medicare Advantage,Medicare,2024-09-23,2026-09-29,1,PCP104,Dr. Brooks
+M1083,Noah,Martinez,1990-06-03,M,FL,Orlando,Orange,Orlando Metro,32801,ACA Exchange,Medicare,2024-01-15,2027-02-22,1,PCP105,Dr. Allen

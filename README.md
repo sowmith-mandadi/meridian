@@ -1,99 +1,81 @@
-# Meridian
+# Inpatient Hospitalization Risk Pipeline
 
-**Codex-powered multi-agent healthcare intelligence platform.**
+This project cleans raw healthcare data, standardizes source tables, creates member-level lookback features, and builds a logistic regression baseline to predict the probability of an inpatient hospital visit in the next 6 months.
 
-Built for the OpenAI Codex Hackathon. Meridian transforms raw healthcare data into actionable insights through governed AI chat, agentic data pipelines, and cross-team agent collaboration.
+## Multi-Agent Design
 
-## Demo
+This repository also defines a lightweight Codex multi-agent structure in `agents/*.toml`.
 
-https://github.com/user-attachments/assets/demo.mov
+- `supervisor`: coordinates the full workflow and enforces the specs approval gate
+- `data-prep`: profiles raw data, standardizes columns, and handles approved imputations
+- `feature-builder`: creates targets, lookback features, and preprocessing metadata
+- `model-evaluator`: refreshes model artifacts and risk scores
+- `qa-validator`: runs deterministic validation and pytest-based quality checks
 
-[Watch the demo video](demo.mov) — Agentic pipeline in Codex: inspect dirty data, profile quality issues, clean records, validate, and publish a reusable data product.
+These agents are aligned to the reusable skills under `skills/`, so the repo keeps role guidance, reusable skills, and deterministic Python scripts separate.
 
-**Live app:** [meridian-two-drab.vercel.app](https://meridian-two-drab.vercel.app)
+## Project Flow
 
-## Quick Start
+1. Review project guidance in `AGENTS.md`.
+2. Generate or refresh `tech_spcs.yml`.
+3. Human reviews the specs file and sets `final_data_approved: true`.
+4. Run the gated pipeline to create staged data, processed outputs, model artifacts, reports, and data dictionaries.
+
+## Setup
 
 ```bash
-# Install dependencies
-pnpm install
-
-# Push database schema (local SQLite)
-pnpm db:push
-
-# Seed with 500 synthetic healthcare members
-pnpm db:seed
-
-# Start dev server
-pnpm dev
+python -m pip install -r requirements.txt
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and sign in with any demo account:
+## Main Command
 
-| Role | Email | Password |
-|------|-------|----------|
-| Care Manager | care_manager@demo.com | demo123 |
-| Analyst | analyst@demo.com | demo123 |
-| Admin | admin@demo.com | demo123 |
+Generate specs draft:
 
-## Architecture
+```bash
+python scripts/run_specs_gated_pipeline.py --force-regenerate-specs
+```
 
-Three layers:
+Run pipeline after approval:
 
-1. **Agentic Data Engineering** (`/pipeline`) — 10 composable MCP tools: inspect, profile, standardize, resolve entities, quarantine, validate, save runs, create data sources, create and list data products
-2. **Governed AI Chat** (`/chat`) — Streaming chat with 6 AI tools, explainability panel, role-based field masking
-3. **Agent-to-Agent Collaboration** (`/collaborate`) — Governed A2A request flow with 8 shared queries across 4 roles
+```bash
+python scripts/run_specs_gated_pipeline.py
+```
 
-## Tech Stack
+## Key Files
 
-- **Next.js 15** App Router on Vercel
-- **Vercel AI SDK v6** with OpenAI (streaming, tool calling)
-- **shadcn/ui** (new-york, dark mode, Geist fonts)
-- **Turso / libSQL** (SQLite-compatible, Vercel serverless ready)
-- **Drizzle ORM** (type-safe SQL)
-- **NextAuth v5** (role-based credentials auth)
-- **Recharts** (embedded charts in chat)
-- **react-resizable-panels** (Kanna-inspired three-panel layout)
+- `data/raw/`: source CSV files
+- `data/staging/`: cleaned and standardized intermediate tables
+- `data/processed/final_member_dataset.csv`: final approved modeling dataset
+- `data/processed/model_artifacts/`: metrics, coefficients, holdout scores, and full dataset scores
+- `data/processed/reports/`: dataset-level summary reports
+- `data/processed/data_dictionaries/`: column-level data dictionaries
+- `agents/`: repo-local multi-agent role configs
+- `skills/`: reusable skills and deterministic helper scripts
+- `tech_spcs.yml`: specs and approval gate
 
-## Codex Plugin
+## Risk Score
 
-The `meridian-healthcare` plugin ships 20+ MCP tools via Streamable HTTP:
+The final probability column is:
 
-| Category | Tools |
-|----------|-------|
-| Pipeline | `inspect_sources`, `profile_table`, `standardize_records`, `resolve_entities`, `quarantine_records`, `validate_quality`, `save_pipeline_run` |
-| Data Products | `create_data_source`, `create_data_product`, `list_data_products` |
-| Chat | `identify_cohort`, `get_risk_drivers`, `explain_member`, `recommend_outreach`, `generate_chart`, `submit_feedback` |
-| Governance | `check_governance`, `request_governed_access`, `governed_member_detail` |
+- `inpatient_hospitalization_risk_probability` in `data/processed/final_member_dataset.csv`
 
-**Install:** Add the plugin from `plugins/meridian-healthcare/` or point to the remote MCP endpoint at `https://meridian-two-drab.vercel.app/api/mcp/mcp`.
+The model score outputs also appear in:
 
-## Codex Artifacts
+- `data/processed/model_artifacts/full_dataset_scores.csv`
+- `data/processed/model_artifacts/holdout_scores.csv`
 
-- `AGENTS.md` — Project context for Codex
-- `.codex/config.toml` — Model and agent configuration
-- `.codex/agents/` — Custom subagents (data-seeder, tool-builder, ui-composer)
-- `.agents/skills/` — Reusable skills (cohort-query, explain-risk, pipeline-runner, governed-access)
+Each scored member now also gets top driver fields such as:
 
-## Deploy to Vercel
+- `top_driver_1_feature`
+- `top_driver_1_contribution`
+- `top_driver_1_direction`
 
-1. Create a [Turso](https://turso.tech) database
-2. Set environment variables in Vercel:
-   - `OPENAI_API_KEY`
-   - `TURSO_DATABASE_URL` (libsql://...)
-   - `TURSO_AUTH_TOKEN`
-   - `AUTH_SECRET`
-3. Deploy: `vercel --prod`
-4. Run seed remotely: `TURSO_DATABASE_URL=libsql://... TURSO_AUTH_TOKEN=... pnpm db:push && pnpm db:seed`
+Long-form member explanation outputs are also written to:
 
-## Pages
+- `data/processed/model_artifacts/member_top_drivers.csv`
+- `data/processed/model_artifacts/holdout_member_top_drivers.csv`
 
-| Route | Description |
-|-------|-------------|
-| `/codex` | Landing page — problem, solution, architecture, demo prompts |
-| `/chat` | Governed AI chat with streaming + tool results |
-| `/pipeline` | Agentic data pipeline DAG viewer |
-| `/collaborate` | Agent-to-agent collaboration with shared queries across roles |
-| `/feedback` | Feedback requests with detail popup |
-| `/observe` | Observability dashboard (tokens, latency, cost) |
-| `/login` | Role-based login with quick demo access |
+## Notes
+
+- The pipeline should not create final data when `final_data_approved: false`.
+- `run_specs_gated_pipeline.py` updates model artifacts during approved runs.
