@@ -154,7 +154,7 @@ export default function CollaboratePage() {
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="care_manager">Care Manager</SelectItem>
-                    <SelectItem value="analyst">Analyst / Pharmacy</SelectItem>
+                    <SelectItem value="analyst">Analyst</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
