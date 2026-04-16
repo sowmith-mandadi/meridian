@@ -3,532 +3,342 @@
 import {
   Activity,
   ArrowRight,
+  BarChart3,
   Bot,
-  BrainCircuit,
-  Code2,
   Database,
-  FileCode2,
+  FileSearch,
   GitBranch,
   Layers,
   MessageSquare,
-  Plug,
+  Package,
+  Play,
+  Search,
   Shield,
   Sparkles,
-  Terminal,
-  Users,
+  Table,
   Wrench,
-  ChevronDown,
-  ChevronRight,
+  Zap,
 } from "lucide-react";
-import { useState } from "react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
 } from "@/components/ui/card";
-import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
 import { AppNav } from "@/components/app-nav";
 
-const SUBAGENTS = [
-  {
-    name: "data_seeder",
-    nicknames: ["Nightingale", "Curie", "Semmelweis"],
-    model: "gpt-5.4",
-    sandbox: "workspace-write",
-    description:
-      "Generates realistic synthetic healthcare data — members, claims, pharmacy, SDOH — with proper ICD-10 codes and correlated risk distributions.",
-  },
-  {
-    name: "tool_builder",
-    nicknames: ["Forge", "Anvil", "Crucible"],
-    model: "gpt-5.4",
-    sandbox: "read-only",
-    description:
-      "Creates AI SDK v6 tool definitions from natural language specs. Outputs production-ready Drizzle queries with zod schemas.",
-  },
-  {
-    name: "ui_composer",
-    nicknames: ["Canvas", "Palette", "Blueprint"],
-    model: "gpt-5.4",
-    sandbox: "workspace-write",
-    description:
-      "Builds shadcn/ui page layouts from wireframe descriptions. Dark mode, Recharts, resizable panels.",
-  },
-  {
-    name: "reviewer",
-    nicknames: ["Sentinel", "Guardian", "Warden"],
-    model: "gpt-5.4",
-    sandbox: "read-only",
-    description:
-      "Reviews code for PHI safety, AI SDK correctness, server/client boundary, type safety, and accessibility.",
-  },
-  {
-    name: "codebase_explorer",
-    nicknames: ["Scout", "Pathfinder", "Ranger"],
-    model: "gpt-5.3-codex-spark",
-    sandbox: "read-only",
-    description:
-      "Read-only explorer for tracing data flows, component relationships, and schema dependencies.",
-  },
+const PIPELINE_TOOLS = [
+  { icon: Search, name: "inspect_sources", desc: "Discover all tables, row counts, null rates" },
+  { icon: BarChart3, name: "profile_table", desc: "Distributions, outliers, data quality stats" },
+  { icon: Wrench, name: "standardize_records", desc: "Fix ICD codes, normalize drugs, quarantine bad data" },
+  { icon: GitBranch, name: "resolve_entities", desc: "FK integrity and fuzzy duplicate detection" },
+  { icon: Shield, name: "validate_quality", desc: "9 configurable quality gates with thresholds" },
+  { icon: Database, name: "save_pipeline_run", desc: "Audit trail of agent decisions and scores" },
+  { icon: Table, name: "create_data_source", desc: "Create new tables from natural language" },
+  { icon: Package, name: "create_data_product", desc: "Publish versioned, reusable data products" },
 ];
 
-const SKILLS = [
-  {
-    name: "cohort-query",
-    description:
-      "Generates Drizzle ORM queries to identify member cohorts by state, condition, risk tier, and SDOH indicators.",
-    hasEval: true,
-  },
-  {
-    name: "explain-risk",
-    description:
-      "Produces plain-language explanations of why a member is flagged as high-risk using clinical, SDOH, and pharmacy data.",
-    hasEval: true,
-  },
-  {
-    name: "outreach-plan",
-    description:
-      "Creates prioritized outreach recommendations mapping risk drivers to specific interventions.",
-    hasEval: false,
-  },
-  {
-    name: "chart-builder",
-    description:
-      "Builds Recharts-compatible data aggregates from Drizzle/SQL for bar, pie, and line visualizations.",
-    hasEval: false,
-  },
-  {
-    name: "pipeline-runner",
-    description:
-      "Executes the 5-step data pipeline (Ingest → Profile → Standardize → Entity Resolve → Validate) with real DB queries.",
-    hasEval: false,
-  },
+const CHAT_TOOLS = [
+  { name: "identify_cohort", desc: "Filter members by state, condition, risk tier" },
+  { name: "get_risk_drivers", desc: "SDOH, clinical, and pharmacy risk factors" },
+  { name: "explain_member", desc: "Why a member was flagged" },
+  { name: "recommend_outreach", desc: "Prioritized interventions" },
+  { name: "generate_chart", desc: "Bar/pie/line from aggregates" },
+  { name: "submit_feedback", desc: "Request new metrics" },
 ];
 
-const FLOW_STEPS = [
-  {
-    icon: Terminal,
-    label: "Developer",
-    sublabel: "Codex + Plugin",
-    color: "text-blue-400",
-  },
-  {
-    icon: GitBranch,
-    label: "Pipeline",
-    sublabel: "5 agentic steps",
-    color: "text-amber-400",
-  },
-  {
-    icon: BrainCircuit,
-    label: "ML Model",
-    sublabel: "Risk prediction",
-    color: "text-purple-400",
-  },
-  {
-    icon: MessageSquare,
-    label: "Chat App",
-    sublabel: "Governed access",
-    color: "text-emerald-400",
-  },
-  {
-    icon: Users,
-    label: "End User",
-    sublabel: "Care manager",
-    color: "text-rose-400",
-  },
+const STATS = [
+  { value: "20+", label: "MCP Tools" },
+  { value: "500", label: "Synthetic Members" },
+  { value: "280", label: "Dirty Records" },
+  { value: "5", label: "Data Tables" },
 ];
 
 export default function CodexPage() {
   return (
     <div className="min-h-screen bg-background">
       <AppNav />
-      {/* Hero */}
-      <header className="border-b px-6 py-10 text-center">
-        <div className="mx-auto max-w-3xl space-y-3">
-          <div className="flex items-center justify-center gap-2">
-            <Activity className="h-8 w-8 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight">Meridian</h1>
+
+      {/* ── Hero ─────────────────────────────────────────────── */}
+      <header className="relative overflow-hidden border-b">
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/[0.03] to-transparent" />
+        <div className="relative mx-auto max-w-4xl px-6 py-20 text-center">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-primary/10">
+              <Activity className="h-6 w-6 text-primary" />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight">Meridian</h1>
           </div>
-          <p className="text-lg text-muted-foreground">
-            From Code to Care — a Codex-powered healthcare intelligence platform
+          <p className="text-xl text-muted-foreground mb-3">
+            From fragmented healthcare data to governed action
           </p>
-          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-            Developers use Codex to build data pipelines and ML models.
-            Care teams use the chat app to query results.
-            One platform, two audiences, connected by governed AI.
+          <p className="text-sm text-muted-foreground max-w-2xl mx-auto leading-relaxed">
+            Codex builds reusable, governed healthcare data products from natural language.
+            Agents inspect, clean, validate, and publish — then care teams query through
+            a governed chat interface. One platform, two audiences, connected by AI.
           </p>
+
+          <div className="flex items-center justify-center gap-3 mt-8">
+            <Link href="/chat">
+              <Button size="lg" className="gap-2">
+                <MessageSquare className="h-4 w-4" />
+                Open Chat
+              </Button>
+            </Link>
+            <Link href="/pipeline">
+              <Button variant="outline" size="lg" className="gap-2">
+                <Play className="h-4 w-4" />
+                Run Pipeline
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
-      {/* End-to-end flow */}
-      <section className="px-6 py-10 border-b">
-        <div className="mx-auto max-w-5xl">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground text-center mb-8">
-            End-to-End Flow
-          </h2>
-          <div className="flex flex-wrap items-center justify-center gap-2 md:gap-0">
-            {FLOW_STEPS.map((step, i) => (
-              <div key={step.label} className="flex items-center">
-                <div className="flex flex-col items-center gap-2 px-4">
-                  <div className="flex h-14 w-14 items-center justify-center rounded-xl border bg-card">
-                    <step.icon className={`h-6 w-6 ${step.color}`} />
-                  </div>
-                  <div className="text-center">
-                    <p className="text-sm font-medium">{step.label}</p>
-                    <p className="text-[10px] text-muted-foreground">
-                      {step.sublabel}
-                    </p>
-                  </div>
+      {/* ── Stats bar ────────────────────────────────────────── */}
+      <section className="border-b bg-card/50">
+        <div className="mx-auto max-w-4xl grid grid-cols-4 divide-x">
+          {STATS.map((s) => (
+            <div key={s.label} className="py-6 text-center">
+              <p className="text-2xl font-bold tracking-tight">{s.value}</p>
+              <p className="text-xs text-muted-foreground mt-0.5">{s.label}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Problem → Solution ───────────────────────────────── */}
+      <section className="px-6 py-16">
+        <div className="mx-auto max-w-4xl">
+          <div className="grid gap-6 md:grid-cols-2">
+            <Card className="border-destructive/20 bg-destructive/[0.02]">
+              <CardContent className="pt-6">
+                <p className="text-sm font-semibold text-destructive mb-3">The Problem</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>70% of analytics time spent on data preparation</li>
+                  <li>Fragmented silos — no unified member view</li>
+                  <li>Weeks to build each data pipeline manually</li>
+                  <li>Downstream teams can't safely query or act on data</li>
+                </ul>
+              </CardContent>
+            </Card>
+            <Card className="border-primary/20 bg-primary/[0.02]">
+              <CardContent className="pt-6">
+                <p className="text-sm font-semibold text-primary mb-3">Meridian's Solution</p>
+                <ul className="space-y-2 text-sm text-muted-foreground">
+                  <li>Agents build data products from natural language</li>
+                  <li>10 composable pipeline tools with real write ops</li>
+                  <li>Governed chat for care coordination and outreach</li>
+                  <li>Feedback loop drives continuous improvement</li>
+                </ul>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </section>
+
+      {/* ── How It Works ─────────────────────────────────────── */}
+      <section className="px-6 py-16 border-t">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-2xl font-bold text-center mb-2">How It Works</h2>
+          <p className="text-sm text-muted-foreground text-center mb-12 max-w-xl mx-auto">
+            Agents manage the full data lifecycle — from dirty ingestion to governed access
+          </p>
+
+          <div className="grid gap-px md:grid-cols-4 rounded-xl overflow-hidden border bg-border">
+            {[
+              { step: "01", icon: FileSearch, title: "Inspect", desc: "Agent inventories data sources, profiles quality, identifies issues", color: "text-blue-400" },
+              { step: "02", icon: Wrench, title: "Clean", desc: "Standardize codes, normalize names, quarantine bad records", color: "text-amber-400" },
+              { step: "03", icon: Shield, title: "Validate", desc: "Run quality gates, resolve entities, save audit trail", color: "text-emerald-400" },
+              { step: "04", icon: Package, title: "Publish", desc: "Create versioned data products for downstream agents and users", color: "text-purple-400" },
+            ].map((item) => (
+              <div key={item.step} className="bg-card p-6 flex flex-col">
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="text-xs font-mono text-muted-foreground">{item.step}</span>
+                  <item.icon className={`h-5 w-5 ${item.color}`} />
                 </div>
-                {i < FLOW_STEPS.length - 1 && (
-                  <ArrowRight className="h-4 w-4 text-muted-foreground mx-1 hidden md:block" />
-                )}
+                <p className="text-sm font-semibold mb-1">{item.title}</p>
+                <p className="text-xs text-muted-foreground leading-relaxed">{item.desc}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Two-sided platform */}
-      <section className="px-6 py-10">
-        <div className="mx-auto max-w-6xl grid gap-8 lg:grid-cols-2">
-          {/* Developer side */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <Code2 className="h-5 w-5 text-blue-400" />
-              <h2 className="text-xl font-semibold">For Developers</h2>
-              <Badge variant="secondary" className="text-[10px]">
-                Codex Plugin
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Data engineers and ML teams use the Meridian Codex plugin to build
-              pipelines, generate training data, and deploy models — all through
-              natural language with Codex.
-            </p>
+      {/* ── Agentic Pipeline Tools ───────────────────────────── */}
+      <section className="px-6 py-16 border-t bg-card/30">
+        <div className="mx-auto max-w-4xl">
+          <div className="flex items-center gap-2 mb-1">
+            <Bot className="h-5 w-5 text-primary" />
+            <h2 className="text-2xl font-bold">Agentic Pipeline</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-8">
+            10 composable MCP tools — the agent decides which to run, in what order, with what parameters
+          </p>
 
-            {/* Plugin card */}
-            <Card>
-              <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <Plug className="h-4 w-4 text-primary" />
-                  <CardTitle className="text-sm">
-                    meridian-healthcare
-                  </CardTitle>
-                  <Badge variant="outline" className="text-[10px] ml-auto">
-                    v1.0.0
-                  </Badge>
+          <div className="grid gap-3 sm:grid-cols-2">
+            {PIPELINE_TOOLS.map((tool) => (
+              <div
+                key={tool.name}
+                className="flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
+              >
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/10">
+                  <tool.icon className="h-4 w-4 text-primary" />
                 </div>
-                <CardDescription className="text-xs">
-                  Population health skills for cohort analysis, risk prediction,
-                  and governed data access
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground space-y-1">
-                <p>
-                  <span className="text-foreground font-medium">5 skills</span>{" "}
-                  · 2 MCP servers · Data & Analytics
-                </p>
-                <div className="flex flex-wrap gap-1 mt-2">
-                  {["healthcare", "population-health", "risk-analysis", "sdoh", "drizzle"].map(
-                    (kw) => (
-                      <Badge
-                        key={kw}
-                        variant="secondary"
-                        className="text-[9px]"
-                      >
-                        {kw}
-                      </Badge>
-                    )
-                  )}
+                <div className="min-w-0">
+                  <p className="text-sm font-mono font-medium truncate">{tool.name}</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{tool.desc}</p>
                 </div>
-              </CardContent>
-            </Card>
-
-            {/* Subagents */}
-            <div>
-              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                <Bot className="h-4 w-4" />
-                Custom Subagents ({SUBAGENTS.length})
-              </h3>
-              <div className="space-y-2">
-                {SUBAGENTS.map((agent) => (
-                  <ExpandableCard
-                    key={agent.name}
-                    title={agent.name}
-                    badge={agent.model}
-                    subtitle={agent.nicknames.join(" / ")}
-                    description={agent.description}
-                    extra={`Sandbox: ${agent.sandbox}`}
-                  />
-                ))}
               </div>
-            </div>
-
-            {/* Skills */}
-            <div>
-              <h3 className="text-sm font-medium mb-3 flex items-center gap-2">
-                <Sparkles className="h-4 w-4" />
-                Bundled Skills ({SKILLS.length})
-              </h3>
-              <div className="space-y-2">
-                {SKILLS.map((skill) => (
-                  <ExpandableCard
-                    key={skill.name}
-                    title={skill.name}
-                    badge={skill.hasEval ? "has eval" : undefined}
-                    description={skill.description}
-                  />
-                ))}
-              </div>
-            </div>
-
-            {/* MCP */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Layers className="h-4 w-4" />
-                  MCP Servers
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs space-y-2">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">turso_healthcare_db</p>
-                    <p className="text-muted-foreground">
-                      Healthcare database: members, claims, pharmacy, SDOH
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-[9px]">
-                    libSQL
-                  </Badge>
-                </div>
-                <Separator />
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="font-medium">openaiDeveloperDocs</p>
-                    <p className="text-muted-foreground">
-                      AI SDK and Codex documentation
-                    </p>
-                  </div>
-                  <Badge variant="outline" className="text-[9px]">
-                    HTTP
-                  </Badge>
-                </div>
-              </CardContent>
-            </Card>
+            ))}
           </div>
 
-          {/* End user side */}
-          <div className="space-y-6">
-            <div className="flex items-center gap-2">
-              <MessageSquare className="h-5 w-5 text-emerald-400" />
-              <h2 className="text-xl font-semibold">For End Users</h2>
-              <Badge variant="secondary" className="text-[10px]">
-                Chat App
-              </Badge>
-            </div>
-            <p className="text-sm text-muted-foreground">
-              Care managers and analysts use the governed chat interface to query
-              population health data, understand risk drivers, and plan outreach
-              — no code required.
-            </p>
+          <p className="text-xs text-muted-foreground mt-4 text-center">
+            Plus <code className="text-foreground">list_data_products</code>, <code className="text-foreground">quarantine_records</code>, and the legacy <code className="text-foreground">run_pipeline</code> one-shot
+          </p>
+        </div>
+      </section>
 
-            {/* Chat capabilities */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Wrench className="h-4 w-4" />
-                  6 AI Tools
-                </CardTitle>
-                <CardDescription className="text-xs">
-                  Each tool queries real data and returns structured results
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  {
-                    name: "identify_cohort",
-                    desc: "Filter members by state, condition, risk tier",
-                  },
-                  {
-                    name: "get_risk_drivers",
-                    desc: "Analyze SDOH, clinical, and pharmacy risk factors",
-                  },
-                  {
-                    name: "explain_member",
-                    desc: "Structured explanation of why a member is flagged",
-                  },
-                  {
-                    name: "recommend_outreach",
-                    desc: "Prioritized interventions based on risk drivers",
-                  },
-                  {
-                    name: "generate_chart",
-                    desc: "Bar/pie charts from population health aggregates",
-                  },
-                  {
-                    name: "submit_feedback",
-                    desc: "Request new metrics or features for the pipeline",
-                  },
-                ].map((tool) => (
-                  <div
-                    key={tool.name}
-                    className="flex items-start gap-2 text-xs"
-                  >
-                    <Badge
-                      variant="secondary"
-                      className="text-[9px] font-mono shrink-0 mt-0.5"
-                    >
+      {/* ── Governed Chat ────────────────────────────────────── */}
+      <section className="px-6 py-16 border-t">
+        <div className="mx-auto max-w-4xl">
+          <div className="flex items-center gap-2 mb-1">
+            <MessageSquare className="h-5 w-5 text-emerald-400" />
+            <h2 className="text-2xl font-bold">Governed Chat</h2>
+          </div>
+          <p className="text-sm text-muted-foreground mb-8">
+            Care teams query governed data products through an AI chat — no code required
+          </p>
+
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="text-sm font-semibold mb-3">AI Tools</h3>
+              <div className="space-y-2">
+                {CHAT_TOOLS.map((tool) => (
+                  <div key={tool.name} className="flex items-start gap-2">
+                    <Badge variant="secondary" className="text-[10px] font-mono shrink-0 mt-0.5">
                       {tool.name}
                     </Badge>
-                    <span className="text-muted-foreground">{tool.desc}</span>
+                    <span className="text-xs text-muted-foreground">{tool.desc}</span>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
 
-            {/* Roles */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Shield className="h-4 w-4" />
-                  Role-Based Access
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
+            <div>
+              <h3 className="text-sm font-semibold mb-3">Governance</h3>
+              <div className="space-y-3">
                 {[
-                  {
-                    role: "Care Manager",
-                    email: "care_manager@demo.com",
-                    access:
-                      "Full chat + cohort identification + outreach recommendations + explainability",
-                  },
-                  {
-                    role: "Analyst",
-                    email: "analyst@demo.com",
-                    access:
-                      "Aggregated data + charts + population-level queries (no individual member details)",
-                  },
-                  {
-                    role: "Admin",
-                    email: "admin@demo.com",
-                    access:
-                      "Everything + feedback management + observability dashboard",
-                  },
+                  { role: "Care Manager", access: "Full member-level access with masked identifiers" },
+                  { role: "Analyst", access: "Aggregated data and charts only" },
+                  { role: "Admin", access: "Everything + observability + feedback management" },
                 ].map((r) => (
-                  <div key={r.role} className="text-xs space-y-0.5">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{r.role}</span>
-                      <span className="text-muted-foreground font-mono text-[10px]">
-                        {r.email}
-                      </span>
-                    </div>
-                    <p className="text-muted-foreground">{r.access}</p>
+                  <div key={r.role} className="rounded-lg border bg-card p-3">
+                    <p className="text-sm font-medium">{r.role}</p>
+                    <p className="text-xs text-muted-foreground mt-0.5">{r.access}</p>
                   </div>
                 ))}
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Sample queries */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <MessageSquare className="h-4 w-4" />
-                  Example Queries
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-2">
-                {[
-                  "Find high-risk members with diabetes in TX and FL (results include SDOH flags)",
-                  "Show risk drivers for member M-1042",
-                  "Recommend outreach for member M-1042 with medication adherence as a driver",
-                  "Generate a chart of claims volume by type",
-                ].map((q, i) => (
-                  <div
-                    key={i}
-                    className="rounded-md bg-muted/50 px-3 py-2 text-xs text-muted-foreground"
-                  >
-                    &ldquo;{q}&rdquo;
-                  </div>
-                ))}
-              </CardContent>
-            </Card>
-
-            {/* Governance */}
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm flex items-center gap-2">
-                  <Shield className="h-4 w-4 text-emerald-400" />
-                  Governance
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-xs text-muted-foreground space-y-1.5">
-                <p>No raw PHI exposed — all data is synthetic or aggregated</p>
-                <p>Tool results are structured JSON, not free-text hallucinations</p>
-                <p>Explainability panel shows why each member was flagged</p>
-                <p>Feedback loop lets users request new metrics without code</p>
-              </CardContent>
-            </Card>
+              <div className="mt-4 rounded-lg border border-primary/20 bg-primary/[0.03] p-3">
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  <span className="font-medium text-foreground">Human-in-the-loop</span> — governed
+                  queries require explicit user approval. Every access is audited with role, intent,
+                  and masked references.
+                </p>
+              </div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Connection: how they link */}
-      <section className="border-t px-6 py-10 bg-muted/20">
-        <div className="mx-auto max-w-4xl text-center space-y-6">
-          <h2 className="text-xl font-semibold">The Continuous Loop</h2>
-          <p className="text-sm text-muted-foreground max-w-2xl mx-auto">
-            Developers build with Codex. The pipeline produces validated,
-            ML-ready data. The chat app makes it accessible. User feedback
-            drives the next iteration.
-          </p>
-          <div className="grid gap-4 md:grid-cols-4 text-left">
+      {/* ── Architecture ─────────────────────────────────────── */}
+      <section className="px-6 py-16 border-t bg-card/30">
+        <div className="mx-auto max-w-4xl">
+          <h2 className="text-2xl font-bold text-center mb-2">Architecture</h2>
+          <p className="text-sm text-muted-foreground text-center mb-10">Three layers, one platform</p>
+
+          <div className="grid gap-4 md:grid-cols-3">
             {[
               {
-                icon: Code2,
-                title: "Build",
-                desc: "Codex + plugin generates pipeline code, tool definitions, and seed data",
-              },
-              {
-                icon: Database,
-                title: "Validate",
-                desc: "Pipeline runs 5 quality steps against real data — 100% quality score",
+                icon: Layers,
+                title: "Agentic Data Engineering",
+                desc: "Composable pipeline tools that inspect, clean, validate, and publish data products from raw sources",
+                path: "/pipeline",
+                badge: "10 tools",
+                color: "text-amber-400",
               },
               {
                 icon: MessageSquare,
-                title: "Serve",
-                desc: "Chat app queries validated data with 6 governed AI tools",
+                title: "Governed AI Chat",
+                desc: "Streaming chat with role-based access, explainability panel, and human-in-the-loop governance",
+                path: "/chat",
+                badge: "6 tools",
+                color: "text-emerald-400",
               },
               {
-                icon: FileCode2,
-                title: "Improve",
-                desc: "User feedback → Codex generates new pipeline steps and tools",
+                icon: Zap,
+                title: "Agent Collaboration",
+                desc: "Host/client agent communication with governed cross-team data access and audit logging",
+                path: "/collaborate",
+                badge: "A2A",
+                color: "text-purple-400",
               },
-            ].map((item) => (
-              <Card key={item.title}>
-                <CardContent className="pt-4 space-y-2">
-                  <item.icon className="h-5 w-5 text-primary" />
-                  <p className="text-sm font-medium">{item.title}</p>
-                  <p className="text-xs text-muted-foreground">{item.desc}</p>
-                </CardContent>
-              </Card>
+            ].map((layer) => (
+              <Link key={layer.title} href={layer.path}>
+                <Card className="h-full transition-all hover:border-primary/30 hover:shadow-sm cursor-pointer">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between mb-3">
+                      <layer.icon className={`h-5 w-5 ${layer.color}`} />
+                      <Badge variant="outline" className="text-[10px]">{layer.badge}</Badge>
+                    </div>
+                    <p className="text-sm font-semibold mb-1">{layer.title}</p>
+                    <p className="text-xs text-muted-foreground leading-relaxed">{layer.desc}</p>
+                  </CardContent>
+                </Card>
+              </Link>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Tech stack */}
+      {/* ── Try It ───────────────────────────────────────────── */}
+      <section className="px-6 py-16 border-t">
+        <div className="mx-auto max-w-3xl text-center">
+          <h2 className="text-2xl font-bold mb-2">Try It</h2>
+          <p className="text-sm text-muted-foreground mb-8 max-w-lg mx-auto">
+            Run these prompts in Codex to see the agentic pipeline in action
+          </p>
+
+          <div className="space-y-3 text-left max-w-2xl mx-auto">
+            {[
+              "Inspect all data sources and profile the raw_claims table",
+              "Standardize raw_claims with a dry run first, then commit the clean records",
+              "Run quality validation, save the pipeline run, and create a data product called 'diabetes_care_gaps'",
+              "As a care_manager, query high-risk members in TX through the governance flow and generate outreach plans",
+            ].map((prompt, i) => (
+              <div
+                key={i}
+                className="group flex items-start gap-3 rounded-lg border bg-card p-4 transition-colors hover:border-primary/30"
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-mono font-medium text-primary">
+                  {i + 1}
+                </span>
+                <p className="text-sm text-muted-foreground leading-relaxed">{prompt}</p>
+                <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/0 group-hover:text-primary transition-colors mt-0.5 ml-auto" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ── Tech Stack ───────────────────────────────────────── */}
       <section className="border-t px-6 py-10">
-        <div className="mx-auto max-w-4xl text-center space-y-6">
-          <h2 className="text-sm font-medium uppercase tracking-wider text-muted-foreground">
+        <div className="mx-auto max-w-4xl text-center">
+          <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground mb-4">
             Built With
-          </h2>
+          </p>
           <div className="flex flex-wrap justify-center gap-2">
             {[
               "OpenAI Codex",
@@ -537,11 +347,10 @@ export default function CodexPage() {
               "shadcn/ui",
               "Turso / libSQL",
               "Drizzle ORM",
+              "MCP",
               "Recharts",
-              "NextAuth v5",
-              "Kanna UI patterns",
             ].map((tech) => (
-              <Badge key={tech} variant="outline" className="text-xs">
+              <Badge key={tech} variant="outline" className="text-xs font-normal">
                 {tech}
               </Badge>
             ))}
@@ -549,77 +358,35 @@ export default function CodexPage() {
         </div>
       </section>
 
-      {/* CTA */}
-      <section className="border-t px-6 py-8">
+      {/* ── Footer CTA ───────────────────────────────────────── */}
+      <section className="border-t bg-card/50 px-6 py-10">
         <div className="mx-auto max-w-2xl flex flex-col items-center gap-4 text-center">
+          <Sparkles className="h-5 w-5 text-primary" />
           <p className="text-sm text-muted-foreground">
-            Try the live demo
+            From fragmented data to governed action — powered by Codex
           </p>
           <div className="flex gap-3">
+            <Link href="/chat">
+              <Button size="sm" className="gap-2">
+                <MessageSquare className="h-3.5 w-3.5" />
+                Open Chat
+              </Button>
+            </Link>
             <Link href="/pipeline">
-              <Button variant="outline" size="sm">
-                <GitBranch className="h-3.5 w-3.5 mr-1.5" />
+              <Button variant="outline" size="sm" className="gap-2">
+                <Play className="h-3.5 w-3.5" />
                 Run Pipeline
               </Button>
             </Link>
-            <Link href="/chat">
-              <Button size="sm">
-                <MessageSquare className="h-3.5 w-3.5 mr-1.5" />
-                Open Chat
+            <Link href="/collaborate">
+              <Button variant="outline" size="sm" className="gap-2">
+                <Zap className="h-3.5 w-3.5" />
+                Collaborate
               </Button>
             </Link>
           </div>
         </div>
       </section>
-    </div>
-  );
-}
-
-function ExpandableCard({
-  title,
-  badge,
-  subtitle,
-  description,
-  extra,
-}: {
-  title: string;
-  badge?: string;
-  subtitle?: string;
-  description: string;
-  extra?: string;
-}) {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="rounded-lg border">
-      <button
-        className="flex w-full items-center gap-2 px-3 py-2 text-xs hover:bg-muted/50 transition-colors"
-        onClick={() => setOpen((v) => !v)}
-      >
-        <span className="font-mono font-medium">{title}</span>
-        {badge && (
-          <Badge variant="secondary" className="text-[9px]">
-            {badge}
-          </Badge>
-        )}
-        {subtitle && (
-          <span className="text-muted-foreground text-[10px] ml-auto mr-2 hidden sm:inline">
-            {subtitle}
-          </span>
-        )}
-        {open ? (
-          <ChevronDown className="h-3 w-3 text-muted-foreground ml-auto" />
-        ) : (
-          <ChevronRight className="h-3 w-3 text-muted-foreground ml-auto" />
-        )}
-      </button>
-      {open && (
-        <div className="px-3 pb-2.5 text-xs text-muted-foreground space-y-1">
-          <p>{description}</p>
-          {extra && (
-            <p className="font-mono text-[10px]">{extra}</p>
-          )}
-        </div>
-      )}
     </div>
   );
 }
