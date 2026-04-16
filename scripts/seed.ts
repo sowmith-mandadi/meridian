@@ -1,5 +1,4 @@
-import { createClient } from "@libsql/client";
-import { drizzle } from "drizzle-orm/libsql";
+import { drizzle } from "drizzle-orm/libsql/node";
 import * as schema from "../src/lib/schema";
 
 const STATES = ["TX", "FL", "CA", "NY"];
@@ -114,10 +113,10 @@ function dateInPast(maxDays: number) {
 }
 
 async function seed() {
-  const client = createClient({
-    url: process.env.TURSO_DATABASE_URL || "file:local.db",
-  });
-  const db = drizzle(client, { schema });
+  const url = process.env.TURSO_DATABASE_URL || "file:local.db";
+  const authToken = process.env.TURSO_AUTH_TOKEN;
+  console.log(`Connecting to: ${url.startsWith("file:") ? url : url.replace(/\/\/.*@/, "//***@")}`);
+  const db = drizzle({ connection: { url, authToken }, schema });
 
   console.log("Seeding database...");
 
