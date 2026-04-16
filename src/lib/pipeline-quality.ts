@@ -63,6 +63,14 @@ type SourceSnapshot = {
   improvement: number;
 };
 
+export type PipelineIssueSummary = {
+  key: string;
+  label: string;
+  found: number;
+  autoFixed: number;
+  quarantined: number;
+};
+
 export type PipelineQualitySnapshot = {
   beforeScore: number;
   afterScore: number;
@@ -72,6 +80,12 @@ export type PipelineQualitySnapshot = {
   correctedRecords: number;
   quarantinedRecords: number;
   retainedRecords: number;
+  issueSummary: {
+    totalFlags: number;
+    autoFixed: number;
+    quarantined: number;
+    topIssues: PipelineIssueSummary[];
+  };
   sources: {
     rawClaims: SourceSnapshot;
     rawPharmacy: SourceSnapshot;
@@ -109,6 +123,47 @@ function summarizeSource(total: number, clean: number, corrected: number, quaran
   };
 }
 
+function createIssueAccumulator() {
+  const issues = new Map<string, PipelineIssueSummary>();
+
+  function recordIssue(
+    key: string,
+    label: string,
+    resolution: "autoFixed" | "quarantined"
+  ) {
+    const existing = issues.get(key) ?? {
+      key,
+      label,
+      found: 0,
+      autoFixed: 0,
+      quarantined: 0,
+    };
+
+    existing.found += 1;
+    if (resolution === "autoFixed") {
+      existing.autoFixed += 1;
+    } else {
+      existing.quarantined += 1;
+    }
+
+    issues.set(key, existing);
+  }
+
+  return {
+    recordIssue,
+    summarize() {
+      const topIssues = [...issues.values()].sort((a, b) => b.found - a.found);
+
+      return {
+        totalFlags: topIssues.reduce((sum, issue) => sum + issue.found, 0),
+        autoFixed: topIssues.reduce((sum, issue) => sum + issue.autoFixed, 0),
+        quarantined: topIssues.reduce((sum, issue) => sum + issue.quarantined, 0),
+        topIssues,
+      };
+    },
+  };
+}
+
 export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnapshot> {
   const [claimRows, pharmacyRows] = await Promise.all([
     db.select().from(rawClaims),
@@ -116,6 +171,7 @@ export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnaps
   ]);
 
   const today = new Date().toISOString().split("T")[0];
+  const issueAccumulator = createIssueAccumulator();
 
   let cleanClaims = 0;
   let correctedClaims = 0;
@@ -126,14 +182,48 @@ export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnaps
     const invalidAmount = row.amount < 0 || row.amount > 100000;
     const invalidDate = !row.date || row.date > today;
 
+    if (invalidMember) {
+      issueAccumulator.recordIssue(
+        "member-integrity",
+        "Missing or orphan member IDs",
+        "quarantined"
+      );
+    }
+    if (invalidAmount) {
+      issueAccumulator.recordIssue(
+        "range-anomalies",
+        "Out-of-range numeric values",
+        "quarantined"
+      );
+    }
+    if (invalidDate) {
+      issueAccumulator.recordIssue(
+        "date-quality",
+        "Missing or future-dated records",
+        "quarantined"
+      );
+    }
+
     let hasFixableCorrection = false;
     let invalidIcd = false;
 
     if (!row.icdCode) {
       invalidIcd = true;
+      issueAccumulator.recordIssue(
+        "unknown-values",
+        "Unknown or unusable clinical values",
+        "quarantined"
+      );
     } else if (!VALID_ICD_CODES.has(row.icdCode)) {
       hasFixableCorrection = Boolean(ICD_CORRECTIONS[row.icdCode]);
       invalidIcd = !hasFixableCorrection;
+      issueAccumulator.recordIssue(
+        hasFixableCorrection ? "normalization" : "unknown-values",
+        hasFixableCorrection
+          ? "Code and name normalization needed"
+          : "Unknown or unusable clinical values",
+        hasFixableCorrection ? "autoFixed" : "quarantined"
+      );
     }
 
     if (invalidMember || invalidAmount || invalidDate || invalidIcd) {
@@ -157,14 +247,48 @@ export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnaps
     const invalidAdherence = row.adherencePct < 0 || row.adherencePct > 100;
     const invalidFillDate = !row.fillDate;
 
+    if (invalidMember) {
+      issueAccumulator.recordIssue(
+        "member-integrity",
+        "Missing or orphan member IDs",
+        "quarantined"
+      );
+    }
+    if (invalidAdherence) {
+      issueAccumulator.recordIssue(
+        "range-anomalies",
+        "Out-of-range numeric values",
+        "quarantined"
+      );
+    }
+    if (invalidFillDate) {
+      issueAccumulator.recordIssue(
+        "date-quality",
+        "Missing or future-dated records",
+        "quarantined"
+      );
+    }
+
     let hasFixableCorrection = false;
     let invalidDrug = false;
 
     if (!row.drugName) {
       invalidDrug = true;
+      issueAccumulator.recordIssue(
+        "unknown-values",
+        "Unknown or unusable clinical values",
+        "quarantined"
+      );
     } else if (!VALID_DRUGS.has(row.drugName)) {
       hasFixableCorrection = Boolean(DRUG_CORRECTIONS[row.drugName]);
       invalidDrug = !hasFixableCorrection;
+      issueAccumulator.recordIssue(
+        hasFixableCorrection ? "normalization" : "unknown-values",
+        hasFixableCorrection
+          ? "Code and name normalization needed"
+          : "Unknown or unusable clinical values",
+        hasFixableCorrection ? "autoFixed" : "quarantined"
+      );
     }
 
     if (invalidMember || invalidAdherence || invalidFillDate || invalidDrug) {
@@ -206,6 +330,7 @@ export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnaps
     correctedRecords,
     quarantinedRecords
   );
+  const issueSummary = issueAccumulator.summarize();
 
   return {
     beforeScore: overallSnapshot.beforeScore,
@@ -216,6 +341,7 @@ export async function getPipelineQualitySnapshot(): Promise<PipelineQualitySnaps
     correctedRecords,
     quarantinedRecords,
     retainedRecords,
+    issueSummary,
     sources: {
       rawClaims: claimSnapshot,
       rawPharmacy: pharmacySnapshot,

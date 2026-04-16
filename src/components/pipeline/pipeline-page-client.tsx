@@ -30,7 +30,10 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { AppNav } from "@/components/app-nav";
 import { cn } from "@/lib/utils";
-import type { PipelineQualitySnapshot } from "@/lib/pipeline-quality";
+import type {
+  PipelineIssueSummary,
+  PipelineQualitySnapshot,
+} from "@/lib/pipeline-quality";
 
 type StepStatus = "idle" | "running" | "completed" | "failed";
 
@@ -561,6 +564,50 @@ function DataQualityCard({
             value={snapshot.quarantinedRecords.toLocaleString()}
           />
         </div>
+
+        <div className="rounded-xl border bg-background/70 p-3">
+          <div className="flex items-center justify-between gap-3">
+            <div>
+              <p className="text-xs font-medium text-foreground">Issue Summary</p>
+              <p className="text-[11px] text-muted-foreground">
+                Concise view of what the cleaner resolves versus quarantines.
+              </p>
+            </div>
+            <div className="text-right">
+              <p className="font-mono text-lg font-semibold">
+                {snapshot.issueSummary.totalFlags}
+              </p>
+              <p className="text-[10px] uppercase tracking-wide text-muted-foreground">
+                issue flags
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            <QualityMiniStat
+              label="Flags"
+              value={snapshot.issueSummary.totalFlags.toLocaleString()}
+            />
+            <QualityMiniStat
+              label={hasRun ? "Fixed" : "Will Fix"}
+              value={snapshot.issueSummary.autoFixed.toLocaleString()}
+            />
+            <QualityMiniStat
+              label={hasRun ? "Review" : "Will Review"}
+              value={snapshot.issueSummary.quarantined.toLocaleString()}
+            />
+          </div>
+
+          <div className="mt-3 space-y-2">
+            {snapshot.issueSummary.topIssues.slice(0, 4).map((issue) => (
+              <IssueSummaryRow
+                key={issue.key}
+                issue={issue}
+                hasRun={hasRun}
+              />
+            ))}
+          </div>
+        </div>
       </CardContent>
     </Card>
   );
@@ -573,6 +620,60 @@ function QualityMiniStat({ label, value }: { label: string; value: string }) {
         {label}
       </p>
       <p className="mt-1 font-mono text-sm">{value}</p>
+    </div>
+  );
+}
+
+function IssueSummaryRow({
+  issue,
+  hasRun,
+}: {
+  issue: PipelineIssueSummary;
+  hasRun: boolean;
+}) {
+  const fullyResolved = issue.autoFixed > 0 && issue.quarantined === 0;
+  const mixed = issue.autoFixed > 0 && issue.quarantined > 0;
+
+  return (
+    <div className="flex items-start justify-between gap-3 rounded-lg border bg-background/80 p-2.5">
+      <div className="min-w-0">
+        <div className="flex items-center gap-2">
+          <p className="text-xs font-medium text-foreground">{issue.label}</p>
+          <span className="font-mono text-[11px] text-muted-foreground">
+            {issue.found}
+          </span>
+        </div>
+        <p className="mt-1 text-[11px] leading-5 text-muted-foreground">
+          {issue.autoFixed > 0
+            ? `${issue.autoFixed} ${hasRun ? "fixed" : "auto-fix"}`
+            : "No auto-fix"}
+          {issue.quarantined > 0
+            ? ` · ${issue.quarantined} ${hasRun ? "quarantined" : "sent to review"}`
+            : ""}
+        </p>
+      </div>
+
+      <Badge
+        variant="secondary"
+        className={cn(
+          "shrink-0 text-[10px]",
+          fullyResolved && "border-emerald-500/30 bg-emerald-500/15 text-emerald-400",
+          mixed && "border-amber-500/30 bg-amber-500/15 text-amber-300",
+          !fullyResolved &&
+            !mixed &&
+            "border-slate-500/30 bg-slate-500/15 text-slate-300"
+        )}
+      >
+        {fullyResolved
+          ? hasRun
+            ? "Resolved"
+            : "Auto-fix"
+          : mixed
+            ? "Mixed"
+            : hasRun
+              ? "Quarantined"
+              : "Review"}
+      </Badge>
     </div>
   );
 }
