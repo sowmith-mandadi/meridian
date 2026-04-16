@@ -19,9 +19,8 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import { ToolResultRenderer } from "./tool-result-renderer";
+import { StructuredTextRenderer } from "./structured-text-renderer";
 
 interface ChatTranscriptProps {
   messages: UIMessage[];
@@ -142,7 +141,14 @@ function MessageRow({ message, index }: { message: UIMessage; index: number }) {
           }`}
         >
           {parts.map((part, i) =>
-            part ? <PartRenderer key={i} part={part} isUser={isUser} /> : null
+            part ? (
+              <PartRenderer
+                key={i}
+                part={part}
+                isUser={isUser}
+                messageHasTools={toolParts.length > 0}
+              />
+            ) : null
           )}
 
           {/* Tool execution timeline */}
@@ -262,7 +268,15 @@ const TOOL_INFO: Record<string, { label: string; description: string }> = {
   },
 };
 
-function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
+function PartRenderer({
+  part,
+  isUser,
+  messageHasTools,
+}: {
+  part: any;
+  isUser: boolean;
+  messageHasTools: boolean;
+}) {
   const result = part.result ?? part.output ?? null;
   const hasResult = result != null;
   const [collapsed, setCollapsed] = useState(true);
@@ -301,11 +315,10 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
           </div>
         )}
         {(restText || !thinkMatch) && (
-          <div className="prose prose-sm dark:prose-invert max-w-none text-sm leading-relaxed prose-headings:font-semibold prose-headings:tracking-tight prose-p:text-foreground/90 prose-strong:text-foreground">
-            <ReactMarkdown remarkPlugins={[remarkGfm]}>
-              {restText ?? part.text}
-            </ReactMarkdown>
-          </div>
+          <StructuredTextRenderer
+            text={restText ?? part.text}
+            inToolContext={messageHasTools}
+          />
         )}
       </div>
     );

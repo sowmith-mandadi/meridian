@@ -37,7 +37,7 @@ import {
 import { cn } from "@/lib/utils";
 import { AppNav } from "@/components/app-nav";
 
-type Role = "care_manager" | "analyst" | "quality" | "admin";
+type Role = "care_manager" | "analyst" | "admin";
 
 const ALL_QUERIES = [
   { label: "High-risk diabetic members in TX and FL", intent: "cohort", filters: { states: ["TX", "FL"], riskTier: "high", diabetesOnly: true }, scope: "member_level" },
@@ -154,8 +154,7 @@ export default function CollaboratePage() {
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
                     <SelectItem value="care_manager">Care Manager</SelectItem>
-                    <SelectItem value="analyst">Analyst / Pharmacy</SelectItem>
-                    <SelectItem value="quality">Quality</SelectItem>
+                    <SelectItem value="analyst">Analyst</SelectItem>
                     <SelectItem value="admin">Admin</SelectItem>
                   </SelectContent>
                 </Select>
