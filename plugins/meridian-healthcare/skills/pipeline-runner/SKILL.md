@@ -1,7 +1,7 @@
 ---
-name: pipeline-runner
+
+## name: pipeline-runner
 description: Runs the 5-step healthcare data pipeline (Ingest, Profile, Standardize, Entity Resolve, Validate) and returns real-time results. Use when building or validating data pipelines.
----
 
 # Pipeline Runner Skill
 
@@ -54,3 +54,4 @@ Array of step results plus a summary:
 - Do NOT read `src/app/api/pipeline/route.ts`
 - Do NOT write or execute scripts
 - ONLY use `run_pipeline` from the `meridian` MCP server
+
