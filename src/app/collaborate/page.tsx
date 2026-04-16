@@ -39,24 +39,16 @@ import { AppNav } from "@/components/app-nav";
 
 type Role = "care_manager" | "analyst" | "quality" | "admin";
 
-const SAMPLE_QUERIES: Record<Role, { label: string; intent: string; filters: Record<string, unknown>; scope: string }[]> = {
-  care_manager: [
-    { label: "High-risk diabetic members in TX and FL", intent: "cohort", filters: { states: ["TX", "FL"], riskTier: "high", diabetesOnly: true }, scope: "member_level" },
-    { label: "Dallas members with 3+ ER visits, no PCP", intent: "provider_coordination", filters: { metroAreaContains: "Dallas", minErVisits: 3, maxPcpVisits: 0, riskTier: "high" }, scope: "member_level" },
-  ],
-  analyst: [
-    { label: "Low adherence members (<60%) by state", intent: "pharmacy_review", filters: { adherenceBelow: 60, riskTier: "high" }, scope: "aggregated" },
-    { label: "High-risk cohort overview", intent: "cohort", filters: { riskTier: "high" }, scope: "member_level" },
-  ],
-  quality: [
-    { label: "Population aggregates by state", intent: "cohort", filters: { riskTier: "high" }, scope: "aggregated" },
-    { label: "Quality gap analysis (high-risk)", intent: "quality_gap", filters: { riskTier: "high", diabetesOnly: true }, scope: "member_level" },
-  ],
-  admin: [
-    { label: "Full member-level view (all high-risk)", intent: "cohort", filters: { riskTier: "high" }, scope: "member_level" },
-    { label: "Aggregated TX overview", intent: "cohort", filters: { states: ["TX"], riskTier: "high" }, scope: "aggregated" },
-  ],
-};
+const ALL_QUERIES = [
+  { label: "High-risk diabetic members in TX and FL", intent: "cohort", filters: { states: ["TX", "FL"], riskTier: "high", diabetesOnly: true }, scope: "member_level" },
+  { label: "Dallas members with 3+ ER visits, no PCP", intent: "provider_coordination", filters: { metroAreaContains: "Dallas", minErVisits: 3, maxPcpVisits: 0, riskTier: "high" }, scope: "member_level" },
+  { label: "Low adherence members (<60%)", intent: "pharmacy_review", filters: { adherenceBelow: 60, riskTier: "high" }, scope: "member_level" },
+  { label: "Quality gap analysis (diabetic, high-risk)", intent: "quality_gap", filters: { riskTier: "high", diabetesOnly: true }, scope: "member_level" },
+  { label: "Population aggregates by state", intent: "cohort", filters: { riskTier: "high" }, scope: "aggregated" },
+  { label: "Member outreach for TX high-risk", intent: "member_outreach", filters: { states: ["TX"], riskTier: "high" }, scope: "member_level" },
+  { label: "Full high-risk cohort (all states)", intent: "cohort", filters: { riskTier: "high" }, scope: "member_level" },
+  { label: "Aggregated pharmacy review", intent: "pharmacy_review", filters: { adherenceBelow: 50, riskTier: "high" }, scope: "aggregated" },
+];
 
 interface GovernedResponse {
   status: string;
@@ -86,8 +78,7 @@ export default function CollaboratePage() {
   const [response, setResponse] = React.useState<GovernedResponse | null>(null);
   const [auditLog, setAuditLog] = React.useState<AuditEntry[]>([]);
 
-  const queries = SAMPLE_QUERIES[role];
-  const currentQuery = queries[selectedQuery] ?? queries[0];
+  const currentQuery = ALL_QUERIES[selectedQuery] ?? ALL_QUERIES[0];
 
   async function handleSend() {
     setLoading(true);
@@ -125,7 +116,7 @@ export default function CollaboratePage() {
   }
 
   React.useEffect(() => { fetchAudit(); }, []);
-  React.useEffect(() => { setSelectedQuery(0); setResponse(null); }, [role]);
+  React.useEffect(() => { setResponse(null); }, [role]);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
@@ -171,11 +162,13 @@ export default function CollaboratePage() {
               </div>
               <div className="flex-[2]">
                 <label className="mb-1.5 block text-xs font-medium text-muted-foreground">Query</label>
-                <Select value={String(selectedQuery)} onValueChange={(v) => setSelectedQuery(Number(v))}>
+                <Select value={String(selectedQuery)} onValueChange={(v) => { setSelectedQuery(Number(v)); setResponse(null); }}>
                   <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
                   <SelectContent>
-                    {queries.map((q, i) => (
-                      <SelectItem key={i} value={String(i)}>{q.label}</SelectItem>
+                    {ALL_QUERIES.map((q, i) => (
+                      <SelectItem key={i} value={String(i)}>
+                        {q.label}
+                      </SelectItem>
                     ))}
                   </SelectContent>
                 </Select>
