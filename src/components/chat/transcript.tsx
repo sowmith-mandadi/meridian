@@ -14,6 +14,10 @@ import {
   Wrench,
   CheckCircle2,
   Loader2,
+  BrainCircuit,
+  Clock,
+  Coins,
+  Timer,
 } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -77,6 +81,16 @@ export function ChatTranscript({ messages, status }: ChatTranscriptProps) {
 
 function MessageRow({ message }: { message: UIMessage }) {
   const isUser = message.role === "user";
+  const parts = message.parts ?? [];
+
+  const toolParts = parts.filter(
+    (p: any) => p?.type?.startsWith("tool-")
+  );
+  const toolTimeline = toolParts.map((p: any) => ({
+    name: p.type.replace("tool-", ""),
+    done: "result" in p && p.result != null,
+    durationMs: p.result?._durationMs,
+  }));
 
   return (
     <div className={`flex gap-3 ${isUser ? "justify-end" : ""}`}>
@@ -92,9 +106,36 @@ function MessageRow({ message }: { message: UIMessage }) {
           isUser ? "max-w-[80%]" : "flex-1"
         }`}
       >
-        {(message.parts ?? []).map((part, i) =>
+        {parts.map((part, i) =>
           part ? <PartRenderer key={i} part={part} isUser={isUser} /> : null
         )}
+
+        {/* Tool execution timeline */}
+        {!isUser && toolTimeline.length > 1 && (
+          <div className="flex items-center gap-1 flex-wrap">
+            <Timer className="h-3 w-3 text-muted-foreground shrink-0" />
+            {toolTimeline.map((t, i) => (
+              <div key={i} className="flex items-center gap-1">
+                <Badge
+                  variant="outline"
+                  className={`text-[9px] font-mono ${
+                    t.done
+                      ? "border-emerald-500/30 text-emerald-400"
+                      : "border-amber-500/30 text-amber-300"
+                  }`}
+                >
+                  {t.done ? "✓" : "⟳"} {t.name}
+                </Badge>
+                {i < toolTimeline.length - 1 && (
+                  <span className="text-muted-foreground text-[10px]">→</span>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* Token/cost footer */}
+        {!isUser && parts.length > 0 && <MessageFooter />}
       </div>
       {isUser && (
         <div className="shrink-0 mt-0.5">
@@ -103,6 +144,57 @@ function MessageRow({ message }: { message: UIMessage }) {
           </div>
         </div>
       )}
+    </div>
+  );
+}
+
+function MessageFooter() {
+  const [usage, setUsage] = useState<{
+    tokensIn: number;
+    tokensOut: number;
+    latencyMs: number;
+    model: string;
+  } | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        const res = await fetch("/api/usage/latest");
+        if (res.ok && !cancelled) {
+          const data = await res.json();
+          if (data) setUsage(data);
+        }
+      } catch {}
+    }, 1500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, []);
+
+  if (!usage) return null;
+
+  const totalTokens = usage.tokensIn + usage.tokensOut;
+  const estimatedCost = (
+    (usage.tokensIn * 0.00015 + usage.tokensOut * 0.0006) /
+    1000
+  ).toFixed(4);
+
+  return (
+    <div className="flex items-center gap-3 text-[10px] text-muted-foreground/60 pt-1">
+      <span className="flex items-center gap-1">
+        <BrainCircuit className="h-2.5 w-2.5" />
+        {usage.model}
+      </span>
+      <span className="flex items-center gap-1">
+        <Coins className="h-2.5 w-2.5" />
+        {totalTokens.toLocaleString()} tokens · ~${estimatedCost}
+      </span>
+      <span className="flex items-center gap-1">
+        <Clock className="h-2.5 w-2.5" />
+        {(usage.latencyMs / 1000).toFixed(1)}s
+      </span>
     </div>
   );
 }
@@ -145,18 +237,39 @@ function PartRenderer({ part, isUser }: { part: any; isUser: boolean }) {
 
   if (part.type === "text") {
     if (!part.text) return null;
+
+    if (isUser) {
+      return (
+        <div className="text-sm leading-relaxed bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5">
+          {part.text}
+        </div>
+      );
+    }
+
+    const thinkMatch = part.text.match(
+      /^>\s*\*\*Thinking[:\s]*\*\*\s*([\s\S]*?)(?:\n\n|$)/
+    );
+    const restText = thinkMatch
+      ? part.text.slice(thinkMatch[0].length).trim()
+      : null;
+
     return (
-      <div
-        className={`text-sm leading-relaxed ${
-          isUser
-            ? "bg-primary text-primary-foreground rounded-2xl rounded-tr-sm px-4 py-2.5"
-            : "prose prose-sm prose-invert max-w-none"
-        }`}
-      >
-        {isUser ? (
-          part.text
-        ) : (
-          <ReactMarkdown remarkPlugins={[remarkGfm]}>{part.text}</ReactMarkdown>
+      <div className="space-y-2">
+        {thinkMatch && (
+          <div className="flex items-start gap-2 rounded-lg border border-purple-500/20 bg-purple-500/5 px-3 py-2">
+            <BrainCircuit className="h-3.5 w-3.5 text-purple-400 shrink-0 mt-0.5" />
+            <div className="text-xs text-purple-300/90 leading-relaxed">
+              <span className="font-medium text-purple-300">Thinking: </span>
+              {thinkMatch[1].trim()}
+            </div>
+          </div>
+        )}
+        {(restText || !thinkMatch) && (
+          <div className="prose prose-sm prose-invert max-w-none text-sm leading-relaxed">
+            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+              {restText ?? part.text}
+            </ReactMarkdown>
+          </div>
         )}
       </div>
     );
