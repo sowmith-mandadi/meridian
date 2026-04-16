@@ -1,45 +1,37 @@
 ---
-name: cohort-query
-description: Generates Drizzle ORM queries to identify healthcare member cohorts from Meridian's Turso database. Use when filtering members by state, condition, risk tier, or SDOH indicators.
----
+
+## name: cohort-query
+description: Identifies healthcare member cohorts by state, condition, risk tier, and SDOH indicators. Use when filtering populations for analysis or outreach.
 
 # Cohort Query Skill
 
-Generate type-safe Drizzle ORM queries against Meridian's schema to find member cohorts.
+Find member cohorts from the Meridian healthcare database.
 
-## Schema
+## How to execute
 
-- `members`: id, name, state, age, gender, risk_score, risk_tier, chronic_conditions
-- `sdoh`: member_id, transportation_flag, food_insecurity, housing_instability
-- `pharmacy`: member_id, drug_name, adherence_pct, fill_date
-- `claims`: member_id, icd_code, type, amount, date, provider
+Use the `meridian` MCP server tool `identify_cohort`. Do NOT read source code, write scripts, or query the database directly.
 
-## Query Patterns
-
-```typescript
-// Filter by state
-where(inArray(members.state, ['TX', 'FL']))
-
-// Filter by risk tier
-where(eq(members.riskTier, 'high'))
-
-// Join SDOH data
-.leftJoin(sdoh, eq(members.id, sdoh.memberId))
-
-// Search conditions (text match)
-where(like(members.chronicConditions, '%Diabetes%'))
-
-// Combine filters
-where(and(
-  inArray(members.state, states),
-  eq(members.riskTier, 'high'),
-  or(...conditions.map(c => like(members.chronicConditions, `%${c}%`)))
-))
+```
+MCP tool: identify_cohort
+Server: meridian
 ```
 
-## Output Format
+## Input
 
-Always return structured JSON:
+```json
+{
+  "states": ["TX", "FL"],
+  "conditions": ["Diabetes"],
+  "riskTier": "high"
+}
+```
+
+- `states`: US state codes. Empty array = all states.
+- `conditions`: Chronic condition keywords to match. Empty = all.
+- `riskTier`: One of "high", "medium", "low".
+
+## Output
+
 ```json
 {
   "count": 47,
@@ -51,15 +43,20 @@ Always return structured JSON:
       "riskScore": 0.82,
       "riskTier": "high",
       "chronicConditions": "Diabetes Type 2, CHF",
-      "sdoh": { "transportationBarrier": true, "foodInsecurity": false, "housingInstability": false }
+      "sdoh": {
+        "transportationBarrier": true,
+        "foodInsecurity": false,
+        "housingInstability": false
+      }
     }
   ]
 }
 ```
 
-## Validation
+## Do not
 
-Run the eval script to verify query correctness:
-```bash
-npx tsx .agents/skills/cohort-query/eval.ts
-```
+- Do NOT read `src/lib/schema.ts` or any source files
+- Do NOT write or execute TypeScript scripts
+- Do NOT use the `turso_healthcare_db` MCP server directly
+- ONLY use the `identify_cohort` tool from the `meridian` MCP server
+

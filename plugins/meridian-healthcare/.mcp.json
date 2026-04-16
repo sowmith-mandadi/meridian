@@ -1,17 +1,14 @@
 {
   "servers": {
-    "turso_healthcare_db": {
+    "meridian": {
       "command": "npx",
-      "args": ["@libsql/mcp-server"],
+      "args": ["tsx", "./plugins/meridian-healthcare/mcp-server.ts"],
       "env": {
         "TURSO_DATABASE_URL": "${TURSO_DATABASE_URL}",
-        "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}"
+        "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}",
+        "MERIDIAN_API_URL": "${MERIDIAN_API_URL}"
       },
-      "description": "Healthcare database with members, claims, pharmacy, SDOH, and call center tables"
-    },
-    "openaiDeveloperDocs": {
-      "url": "https://developers.openai.com/mcp",
-      "description": "OpenAI developer documentation for AI SDK and Codex guidance"
+      "description": "Meridian Healthcare Intelligence — 7 tools for cohort queries, risk analysis, outreach, charts, pipeline execution"
     }
   }
 }

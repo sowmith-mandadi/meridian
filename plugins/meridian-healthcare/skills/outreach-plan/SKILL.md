@@ -1,43 +1,56 @@
 ---
 name: outreach-plan
-description: Generates prioritized outreach action plans for healthcare members based on risk drivers. Use when recommending interventions for care managers.
+description: Generates prioritized outreach recommendations for healthcare members based on risk drivers. Use when recommending interventions.
 ---
 
 # Outreach Plan Skill
 
-Create structured, actionable outreach recommendations for high-risk members.
+Create actionable outreach recommendations mapped to risk drivers.
 
-## Logic
+## How to execute
 
-Map risk drivers to interventions:
+Use the `meridian` MCP server tool `recommend_outreach`. Do NOT read source code or write scripts.
 
-| Driver | Action | Priority |
-|--------|--------|----------|
-| Transportation barrier | Offer transportation benefit navigation + scheduling | high |
-| Food insecurity | Connect to food assistance programs + meal benefit review | high |
-| Medication non-adherence | Pharmacist-led adherence call + 90-day fill review | medium |
-| High clinical risk | Care manager outreach within 48 hours | high |
-| Housing instability | Social worker referral + housing resource navigation | high |
-| Recent ED visit | Post-discharge follow-up within 72 hours | high |
+```
+MCP tool: recommend_outreach
+Server: meridian
+```
 
-## Output Format
+## Input
+
+```json
+{
+  "memberId": "M-1042",
+  "drivers": ["transportation", "medication adherence"]
+}
+```
+
+- `memberId`: The member ID to generate outreach for.
+- `drivers`: Array of risk driver keywords. The tool maps these to specific interventions.
+
+## Driver-to-action mapping
+
+| Driver keyword | Action generated |
+|---------------|-----------------|
+| transport, sdoh | Transportation benefit navigation |
+| food, hunger | Food assistance programs |
+| adher, pharmacy, medication | Pharmacist-led adherence call |
+| clinical, risk | Care manager outreach within 48h |
+
+## Output
 
 ```json
 {
   "memberId": "M-1042",
   "memberName": "...",
   "recommendations": [
-    {
-      "action": "Description of the intervention",
-      "priority": "high",
-      "rationale": "Why this action for this member"
-    }
+    { "action": "...", "priority": "high", "rationale": "..." }
   ]
 }
 ```
 
-## Governance
+## Do not
 
-- Recommendations are suggestions, not clinical orders
-- Always include rationale linking the action to the specific driver
-- Priority must be one of: high, medium, low
+- Do NOT read source files
+- Do NOT write scripts
+- ONLY use `recommend_outreach` from the `meridian` MCP server

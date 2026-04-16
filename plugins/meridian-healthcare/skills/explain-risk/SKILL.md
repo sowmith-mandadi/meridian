@@ -1,45 +1,43 @@
 ---
 name: explain-risk
-description: Generates plain-language explanations of why a healthcare member was flagged as high-risk. Use when creating member-level risk narratives or outreach justifications.
+description: Generates plain-language explanations of why a healthcare member was flagged as high-risk. Use when creating member-level risk narratives.
 ---
 
 # Explain Risk Skill
 
-Generate human-readable, clinically appropriate explanations for member risk flags.
+Produce structured explanations for member risk flags.
 
-## Inputs
+## How to execute
 
-- Member record: id, name, age, gender, state, risk_score, risk_tier, chronic_conditions
-- SDOH data: transportation_flag, food_insecurity, housing_instability
-- Pharmacy data: drug_name, adherence_pct, fill_date
-- Claims data: icd_code, type, amount, date, provider
+Use two `meridian` MCP server tools in sequence:
 
-## Explanation Structure
+1. `get_risk_drivers` — get scored risk drivers
+2. `explain_member` — get full structured explanation
 
-The output must have these sections:
+Do NOT read source code, write scripts, or query the database directly.
 
-```json
-{
-  "sections": {
-    "overview": { "title": "Overview", "summary": "One-paragraph plain-language summary" },
-    "demographics": { "title": "Demographics", "id": "...", "name": "...", ... },
-    "clinical": { "title": "Clinical profile", "chronicConditions": "...", "riskScore": 0.82 },
-    "sdoh": { "title": "Social determinants", "transportationBarrier": true, ... },
-    "pharmacy": { "title": "Pharmacy", "fills": [...] },
-    "claims": { "title": "Recent claims", "claimCount": 12, "totalAmount": 15420, ... }
-  }
-}
+## Tool 1: get_risk_drivers
+
+```
+MCP tool: get_risk_drivers
+Server: meridian
+Input: { "memberId": "M-1042" }
 ```
 
-## Governance Rules
+Returns drivers ranked by score (0-1): clinical risk, transportation, food insecurity, housing, medication adherence.
 
-- Never fabricate clinical data — only use what's in the database
-- Never expose raw member names in aggregated views
-- Always include a disclaimer that human review is recommended for clinical decisions
-- SDOH flags should be described sensitively (e.g., "transportation access challenge" not "can't afford a car")
+## Tool 2: explain_member
 
-## Validation
-
-```bash
-npx tsx .agents/skills/explain-risk/eval.ts
 ```
+MCP tool: explain_member
+Server: meridian
+Input: { "memberId": "M-1042" }
+```
+
+Returns structured sections: overview, demographics, clinical, SDOH, pharmacy fills, recent claims.
+
+## Do not
+
+- Do NOT read `src/` files or `scripts/`
+- Do NOT write or execute TypeScript
+- ONLY use `get_risk_drivers` and `explain_member` from the `meridian` MCP server

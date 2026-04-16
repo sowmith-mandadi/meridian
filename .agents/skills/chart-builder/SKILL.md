@@ -1,50 +1,56 @@
 ---
 name: chart-builder
-description: Builds chart-ready data aggregates from Meridian's healthcare database. Use when generating visualizations for population health metrics.
+description: Builds chart-ready data aggregates from the healthcare database. Use when generating visualizations for population health metrics.
 ---
 
 # Chart Builder Skill
 
-Generate Recharts-compatible data from Drizzle/SQL aggregations.
+Generate Recharts-compatible aggregated data.
 
-## Supported Chart Types
+## How to execute
 
-- `bar` — grouped counts or averages (members by state, claims by type)
-- `pie` — distribution breakdowns (risk tier distribution)
-- `line` — time series (claims over months, not yet implemented)
+Use the `meridian` MCP server tool `generate_chart`. Do NOT read source code or write scripts.
 
-## Query Routing
+```
+MCP tool: generate_chart
+Server: meridian
+```
 
-Parse the `dataQuery` string to decide which aggregation to run:
+## Input
 
-| Keyword | Query |
-|---------|-------|
-| "state" | `SELECT state, count(*) FROM members GROUP BY state` |
-| "tier", "risk" | `SELECT risk_tier, count(*) FROM members GROUP BY risk_tier` |
-| "claim" | `SELECT type, count(*) FROM claims GROUP BY type` |
-| default | Risk tier distribution as fallback |
+```json
+{
+  "chartType": "bar",
+  "dataQuery": "members by risk tier"
+}
+```
 
-## Output Format
+- `chartType`: One of "bar", "pie", "line".
+- `dataQuery`: Natural language hint. Keywords trigger specific aggregations:
+
+| Keyword | Aggregation |
+|---------|------------|
+| "state" | Members grouped by state |
+| "tier", "risk" | Members grouped by risk tier |
+| "claim" | Claims grouped by type |
+| (default) | Risk tier distribution |
+
+## Output
 
 ```json
 {
   "type": "bar",
   "title": "Members by risk tier",
   "data": [
-    { "name": "high", "value": 159 },
+    { "name": "high", "value": 136 },
     { "name": "medium", "value": 176 },
-    { "name": "low", "value": 165 }
+    { "name": "low", "value": 188 }
   ]
 }
 ```
 
-## Recharts Integration
+## Do not
 
-The UI renders this data with:
-```tsx
-<BarChart data={data}>
-  <XAxis dataKey="name" />
-  <YAxis />
-  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4,4,0,0]} />
-</BarChart>
-```
+- Do NOT read source files or schema definitions
+- Do NOT write SQL or TypeScript
+- ONLY use `generate_chart` from the `meridian` MCP server
