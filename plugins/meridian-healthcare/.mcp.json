@@ -8,7 +8,7 @@
         "TURSO_AUTH_TOKEN": "${TURSO_AUTH_TOKEN}",
         "MERIDIAN_API_URL": "${MERIDIAN_API_URL}"
       },
-      "description": "Meridian Healthcare Intelligence — 7 tools for cohort queries, risk analysis, outreach, charts, pipeline execution"
+      "description": "Meridian Healthcare Intelligence — 10 tools for cohort queries, risk analysis, outreach, charts, pipeline execution, and governed A2A access with role-based field masking and audit logging"
     }
   }
 }

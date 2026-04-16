@@ -15,6 +15,9 @@
     "cohort-query",
     "sdoh",
     "claims",
+    "governance",
+    "a2a",
+    "role-based-access",
     "drizzle",
     "turso"
   ],
@@ -23,8 +26,8 @@
   "apps": "./.app.json",
   "interface": {
     "displayName": "Meridian Healthcare Intelligence",
-    "shortDescription": "Population health skills: cohorts, risk drivers, outreach, charts",
-    "longDescription": "A complete healthcare intelligence toolkit for Codex. Includes skills for querying member cohorts by state/condition/risk, analyzing SDOH and clinical risk drivers, generating outreach recommendations, building chart-ready aggregates, and explaining member-level risk. Designed for Drizzle ORM + Turso/SQLite with a standard healthcare schema (members, claims, pharmacy, SDOH, call center).",
+    "shortDescription": "Population health skills with governed A2A access: cohorts, risk drivers, outreach, charts",
+    "longDescription": "A complete healthcare intelligence toolkit for Codex with governed agent-to-agent access. Includes skills for querying member cohorts, analyzing risk drivers, generating outreach recommendations, and building chart aggregates — all with role-based governance, field masking, and audit logging. Features human-in-the-loop governance gates where users must approve access before data flows. Designed for Drizzle ORM + Turso/SQLite.",
     "developerName": "Team Meridian",
     "category": "Data & Analytics",
     "capabilities": ["Read", "Write"],
@@ -33,7 +36,9 @@
       "Find high-risk diabetic members in TX and FL with transportation barriers",
       "Analyze risk drivers for member M-1042 and recommend outreach",
       "Generate a bar chart of members by risk tier",
-      "Explain why member M-1100 was flagged as high risk"
+      "Explain why member M-1100 was flagged as high risk",
+      "Run the governance demo — show me how role-based access control works",
+      "Query high-risk members as an analyst role with governance approval"
     ],
     "brandColor": "#10A37F",
     "composerIcon": "./assets/icon.svg"

@@ -13,7 +13,8 @@
     "db:seed": "npx tsx scripts/seed.ts",
     "db:push:prod": "dotenv -e .env.production -- drizzle-kit push",
     "db:seed:prod": "dotenv -e .env.production -- npx tsx scripts/seed.ts",
-    "mcp:build": "esbuild ./plugins/meridian-healthcare/mcp-server.ts --bundle --platform=node --format=esm --outfile=./plugins/meridian-healthcare/mcp-server.mjs --packages=external"
+    "mcp:build": "esbuild ./plugins/meridian-healthcare/mcp-server.ts --bundle --platform=node --format=esm --outfile=./plugins/meridian-healthcare/mcp-server.mjs --packages=external",
+    "mcp:serve": "npx tsx plugins/meridian-healthcare/mcp-http-server.ts"
   },
   "dependencies": {
     "@ai-sdk/openai": "^3.0.52",
@@ -26,6 +27,7 @@
     "cmdk": "^1.1.1",
     "drizzle-orm": "^0.45.2",
     "lucide-react": "^1.8.0",
+    "mcp-handler": "^1.1.0",
     "next": "16.2.3",
     "next-auth": "5.0.0-beta.30",
     "radix-ui": "^1.4.3",
