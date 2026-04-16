@@ -1,0 +1,73 @@
+project_name = "inpatient_hospital_visit_prediction"
+approval_required = true
+human_review_required = true
+objective = "Use a supervised Python harness to generate a gated execution contract, standardize local healthcare CSVs, engineer member-level inpatient risk features, and train a logistic baseline that can be demoed from Codex alongside the Next.js app."
+workflow = [
+  "Generate tech_spcs.yml from AGENTS.md and config defaults",
+  "Pause for human approval before any final derived data is created",
+  "Profile and standardize raw healthcare source tables into data/staging",
+  "Validate staging tables before target and feature engineering",
+  "Build the inpatient target, member lookback features, preprocessing manifest, and logistic model artifacts",
+  "Merge approved outputs into data/processed/final_member_dataset.csv and emit reports and data dictionaries",
+]
+notes = [
+  "This repo's product UI remains the Next.js app; the Python harness is a local Codex demo sidecar.",
+  "Use python3 in local terminal sessions if a plain python shim is unavailable.",
+  "Generated outputs belong under data/staging and data/processed and should be produced from the checked-in raw demo CSVs.",
+]
+
+[approval_flow]
+step_1 = "Generate tech_spcs.yml from AGENTS.md"
+step_2 = "Human reviews and edits specs"
+step_3 = "Human sets final_data_approved: true"
+step_4 = "Pipeline creates final data on rerun"
+
+[data_contract]
+raw_dir = "data/raw"
+staging_dir = "data/staging"
+processed_dir = "data/processed"
+final_dataset_path = "data/processed/final_member_dataset.csv"
+
+[entity_contract]
+join_grain = "member"
+canonical_member_key = "member_id"
+canonical_date_fields = [
+  "birth_date",
+  "service_date",
+  "event_date",
+  "fill_date",
+  "contact_date",
+  "assessment_date",
+  "eligibility_start",
+  "eligibility_end",
+]
+
+[target_definition]
+target_column = "inpatient_hospital_visit_next_6m"
+target_source = "utilization.csv"
+target_event = "visit_type == INPATIENT"
+prediction_horizon_months = 6
+target_grain = "member_index_date"
+
+[feature_policy]
+lookback_windows_months = [3, 6]
+feature_grain = "member"
+include_selective_aggregations_only = true
+feature_families = ["claims", "utilization", "pharmacy", "call_center", "sdoh", "enrollment"]
+
+[model_policy]
+baseline_model = "logistic_regression"
+scoring_goal = "predict probability of inpatient visit in next 6 months"
+
+[validation]
+require_cleaning_tests = true
+require_staging_validation = true
+
+[pipeline_outputs]
+deliverables = [
+  "data/staging/*.csv cleaned source tables",
+  "data/processed/member_inpatient_target_next_6m.csv",
+  "data/processed/member_lookback_features.csv",
+  "data/processed/preprocessing_manifest.json",
+  "data/processed/final_member_dataset.csv only after approval",
+]

@@ -45,3 +45,12 @@ next-env.d.ts
 # local db
 local.db
 local.db-journal
+
+# python sidecar pipeline
+.venv/
+.pytest_tmp/
+__pycache__/
+*.pyc
+data/staging/
+data/processed/
+tech_spcs.yml

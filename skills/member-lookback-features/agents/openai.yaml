@@ -1,0 +1,4 @@
+interface:
+  display_name: "Lookback Features"
+  short_description: "Build member lookback features"
+  default_prompt: "Use $member-lookback-features to generate selective 3 month and 6 month member-level features."

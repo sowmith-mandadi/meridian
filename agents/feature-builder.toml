@@ -1,0 +1,12 @@
+name = "feature-builder"
+role = "target_and_feature_engineering"
+goal = "Create the inpatient target, member-level lookback features, and preprocessing metadata."
+uses_skills = ["inpatient-target-labeler", "member-lookback-features", "tabular-preprocessing"]
+inputs = ["data/staging/*.csv", "tech_spcs.yml"]
+outputs = ["data/processed/member_inpatient_target_next_6m.csv", "data/processed/member_lookback_features.csv", "data/processed/preprocessing_manifest.json"]
+handoffs_to = ["model-evaluator", "qa-validator"]
+guardrails = [
+  "Use only pre-index information for lookback features.",
+  "Keep feature engineering selective, not exhaustive.",
+  "Retain explicit label-window columns in the target output."
+]

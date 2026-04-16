@@ -1,0 +1,4 @@
+interface:
+  display_name: "Logistic Risk Model"
+  short_description: "Train inpatient risk baseline"
+  default_prompt: "Use $logistic-risk-model to fit and evaluate the logistic regression baseline for inpatient risk."

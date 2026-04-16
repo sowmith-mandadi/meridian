@@ -41,7 +41,8 @@
       "Generate a bar chart of members by risk tier",
       "Inspect all data sources, profile raw_claims, then standardize them with a dry run first",
       "Run the full agentic pipeline: inspect, profile, standardize, resolve entities, validate quality, and save the run",
-      "Create a data product called 'diabetes_care_gaps' from members and claims for high-risk diabetic members in TX"
+      "Create a data product called 'diabetes_care_gaps' from members and claims for high-risk diabetic members in TX",
+      "Generate tech_spcs.yml for the local inpatient risk pipeline, wait for approval, then run the Python harness from terminal"
     ],
     "brandColor": "#10A37F",
     "composerIcon": "./assets/icon.svg"

@@ -1,0 +1,4 @@
+interface:
+  display_name: "Column Standardizer"
+  short_description: "Standardize healthcare columns"
+  default_prompt: "Use $healthcare-column-standardizer to standardize member IDs and date columns into a staging contract."

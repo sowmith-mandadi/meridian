@@ -1,0 +1,12 @@
+name = "data-prep"
+role = "data_cleaning_and_standardization"
+goal = "Profile raw healthcare data, standardize source tables, and apply approved imputations for staging outputs."
+uses_skills = ["healthcare-data-profile-clean", "healthcare-column-standardizer", "missing-value-imputer"]
+inputs = ["data/raw"]
+outputs = ["data/staging/profile_summary.json", "data/staging/*.csv", "data/staging/column_standardization_manifest.json"]
+handoffs_to = ["feature-builder", "qa-validator"]
+guardrails = [
+  "Keep one canonical member_id across staging tables.",
+  "Preserve source-specific event dates.",
+  "Do not invent imputation rules that are not approved in specs."
+]

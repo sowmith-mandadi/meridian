@@ -1,0 +1,4 @@
+interface:
+  display_name: "Missing Value Imputer"
+  short_description: "Impute missing values safely"
+  default_prompt: "Use $missing-value-imputer to apply deterministic missing-value handling to a staged table."

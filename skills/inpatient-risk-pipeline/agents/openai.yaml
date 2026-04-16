@@ -1,0 +1,4 @@
+interface:
+  display_name: "Inpatient Risk Pipeline"
+  short_description: "Run inpatient workflow safely"
+  default_prompt: "Use $inpatient-risk-pipeline to run the inpatient risk workflow while enforcing the specs approval gate."

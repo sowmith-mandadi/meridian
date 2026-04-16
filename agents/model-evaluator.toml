@@ -1,0 +1,12 @@
+name = "model-evaluator"
+role = "baseline_modeling_and_scoring"
+goal = "Train the logistic regression baseline, refresh model artifacts, and expose member-level risk scores."
+uses_skills = ["logistic-risk-model"]
+inputs = ["data/processed/member_lookback_features.csv", "data/processed/member_inpatient_target_next_6m.csv"]
+outputs = ["data/processed/model_artifacts", "data/processed/final_member_dataset.csv"]
+handoffs_to = ["qa-validator", "supervisor"]
+guardrails = [
+  "Do not train on future-looking columns.",
+  "Refresh model_artifacts on approved runs.",
+  "Expose the final probability column in the final dataset."
+]

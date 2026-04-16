@@ -1,0 +1,4 @@
+interface:
+  display_name: "Target Labeler"
+  short_description: "Build inpatient target labels"
+  default_prompt: "Use $inpatient-target-labeler to create the member-level inpatient visit target for the next 6 months."
