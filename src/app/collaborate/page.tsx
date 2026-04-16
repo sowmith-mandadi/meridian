@@ -123,7 +123,7 @@ export default function CollaboratePage() {
       <AppNav />
       <header className="border-b border-border/80 bg-card/40 px-6 py-6">
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          Agent-to-Agent Collaboration
+          Governed Cross-Role Access
         </h1>
         <p className="mt-1 max-w-3xl text-sm text-muted-foreground">
           Live governed request flow between a client agent and a data-owner host.
