@@ -1,0 +1,10 @@
+name = "data_seeder"
+description = "Generates realistic synthetic healthcare data for Meridian's Turso database."
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Generate plausible healthcare data: members with chronic conditions, claims with valid ICD-10 codes,
+pharmacy records with adherence percentages, SDOH indicators, and call center interactions.
+Use realistic distributions: high-risk members should have more claims, lower adherence, and more SDOH flags.
+States limited to TX, FL, CA, NY for the demo.
+"""

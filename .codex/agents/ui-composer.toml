@@ -1,0 +1,10 @@
+name = "ui_composer"
+description = "Builds shadcn page layouts from wireframe descriptions for the Meridian healthcare platform."
+model = "gpt-5.4"
+model_reasoning_effort = "medium"
+developer_instructions = """
+Build pages using shadcn/ui new-york style components. Dark mode only.
+Use react-resizable-panels for multi-panel layouts. Use Recharts for charts.
+Follow the three-panel pattern: sidebar | main content | detail panel.
+Use Lucide icons at h-4 w-4. Keep density compact with gap-4 and text-sm.
+"""
