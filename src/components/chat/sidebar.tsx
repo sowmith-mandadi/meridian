@@ -34,7 +34,7 @@ const SUGGESTED_PROMPTS = [
 const NAV_ITEMS = [
   { href: "/chat", label: "Chat", icon: MessageSquare },
   { href: "/pipeline", label: "Pipeline", icon: GitBranch },
-  { href: "/collaborate", label: "Collaborate", icon: Users },
+  { href: "/collaborate", label: "Governance Tracking", icon: Users },
   { href: "/feedback", label: "Feedback", icon: MessageCircle },
   { href: "/observe", label: "Observe", icon: BarChart3 },
   { href: "/codex", label: "Codex Story", icon: Sparkles },
