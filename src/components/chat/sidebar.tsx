@@ -11,7 +11,10 @@ import {
   Plus,
   Trash2,
   Sparkles,
+  Sun,
+  Moon,
 } from "lucide-react";
+import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
@@ -57,24 +60,30 @@ export function ChatSidebar({
   onDeleteChat,
 }: ChatSidebarProps) {
   const pathname = usePathname();
+  const { theme, setTheme } = useTheme();
 
   return (
-    <div className="flex h-full w-full flex-col bg-card border-r overflow-hidden">
-      {/* Header */}
-      <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0">
-        <Activity className="h-5 w-5 text-primary shrink-0" />
-        <span className="font-semibold text-sm truncate">Meridian</span>
-        <Badge variant="secondary" className="ml-auto text-[10px] shrink-0">
-          AI
+    <div className="flex h-full w-full flex-col bg-sidebar border-r border-sidebar-border overflow-hidden">
+      {/* Brand header */}
+      <div className="flex items-center gap-2.5 px-4 py-3.5 border-b border-sidebar-border shrink-0">
+        <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-primary/10">
+          <Activity className="h-4 w-4 text-primary" />
+        </div>
+        <div className="flex flex-col min-w-0">
+          <span className="font-semibold text-sm tracking-tight truncate">Meridian</span>
+          <span className="text-[10px] text-muted-foreground leading-none">Healthcare AI</span>
+        </div>
+        <Badge variant="secondary" className="ml-auto text-[10px] shrink-0 bg-primary/10 text-primary border-0">
+          v2
         </Badge>
       </div>
 
       {/* New chat */}
-      <div className="px-3 py-2 shrink-0">
+      <div className="px-3 py-2.5 shrink-0">
         <Button
           variant="outline"
           size="sm"
-          className="w-full justify-start gap-2"
+          className="w-full justify-start gap-2 border-dashed hover:border-primary/40 hover:bg-primary/5 transition-all duration-200"
           onClick={onNewChat}
         >
           <Plus className="h-3.5 w-3.5 shrink-0" />
@@ -98,9 +107,9 @@ export function ChatSidebar({
                   <div
                     key={chat.id}
                     className={cn(
-                      "group flex items-center gap-1.5 px-2 py-1.5 rounded-md text-xs cursor-pointer transition-colors",
+                      "group flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs cursor-pointer transition-all duration-150",
                       chat.id === activeChatId
-                        ? "bg-muted text-foreground"
+                        ? "bg-primary/10 text-foreground font-medium"
                         : "text-muted-foreground hover:text-foreground hover:bg-muted"
                     )}
                     onClick={() => onSelectChat(chat.id)}
@@ -108,7 +117,7 @@ export function ChatSidebar({
                     <MessageSquare className="h-3 w-3 shrink-0" />
                     <span className="truncate flex-1">{chat.title}</span>
                     <button
-                      className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 hover:text-destructive transition-opacity"
+                      className="opacity-0 group-hover:opacity-100 shrink-0 p-0.5 hover:text-destructive transition-all duration-150"
                       onClick={(e) => {
                         e.stopPropagation();
                         onDeleteChat(chat.id);
@@ -131,7 +140,7 @@ export function ChatSidebar({
             {SUGGESTED_PROMPTS.map((prompt) => (
               <button
                 key={prompt}
-                className="w-full text-left px-2 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors leading-snug"
+                className="w-full text-left px-2 py-2 text-xs text-muted-foreground hover:text-foreground hover:bg-primary/5 rounded-lg transition-all duration-150 leading-snug"
                 onClick={() => {
                   const event = new CustomEvent("meridian:prompt", {
                     detail: prompt,
@@ -156,9 +165,9 @@ export function ChatSidebar({
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "flex items-center gap-2 px-2 py-2 text-sm rounded-md transition-colors",
+                  "flex items-center gap-2 px-2 py-2 text-sm rounded-lg transition-all duration-150",
                   pathname === item.href
-                    ? "bg-muted text-foreground font-medium"
+                    ? "bg-primary/10 text-foreground font-medium"
                     : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
               >
@@ -171,17 +180,27 @@ export function ChatSidebar({
       </ScrollArea>
 
       <Separator className="shrink-0" />
-      <div className="px-3 py-2 shrink-0">
+      <div className="px-3 py-2 space-y-1 shrink-0">
         <Button
           variant="ghost"
           size="sm"
-          className="w-full justify-start gap-2 text-xs"
+          className="w-full justify-start gap-2 text-xs hover:bg-primary/5 transition-all duration-150"
           onClick={onToggleExplain}
         >
           <PanelRight className="h-3.5 w-3.5 shrink-0" />
           <span className="truncate">
             {showExplain ? "Hide" : "Show"} Explain Panel
           </span>
+        </Button>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="w-full justify-start gap-2 text-xs hover:bg-primary/5 transition-all duration-150"
+          onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+        >
+          <Sun className="h-3.5 w-3.5 shrink-0 rotate-0 scale-100 transition-transform dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-3.5 w-3.5 shrink-0 rotate-90 scale-0 transition-transform dark:rotate-0 dark:scale-100" />
+          <span className="truncate">Toggle theme</span>
         </Button>
       </div>
     </div>

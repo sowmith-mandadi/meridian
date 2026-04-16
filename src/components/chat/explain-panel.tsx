@@ -25,7 +25,13 @@ import {
   Cell,
 } from "recharts";
 
-const CHART_COLORS = ["hsl(var(--chart-1))", "hsl(var(--chart-2))", "hsl(var(--chart-3))", "hsl(var(--chart-4))", "hsl(var(--chart-5))"];
+const CHART_COLORS = [
+  "oklch(0.65 0.17 200)",
+  "oklch(0.70 0.14 160)",
+  "oklch(0.60 0.12 280)",
+  "oklch(0.68 0.16 40)",
+  "oklch(0.62 0.14 320)",
+];
 
 interface ToolResult {
   toolName: string;
@@ -39,10 +45,12 @@ interface ExplainPanelProps {
 
 export function ExplainPanel({ toolResult, allResults = [] }: ExplainPanelProps) {
   return (
-    <div className="flex h-full flex-col border-l bg-card">
-      <div className="flex items-center gap-2 px-4 py-3 border-b shrink-0">
-        <Info className="h-4 w-4 text-muted-foreground" />
-        <span className="text-sm font-medium">Explainability</span>
+    <div className="flex h-full flex-col border-l border-border/60 bg-card/50 animate-slide-in-right">
+      <div className="flex items-center gap-2 px-4 py-3.5 border-b shrink-0">
+        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-primary/10">
+          <Info className="h-3.5 w-3.5 text-primary" />
+        </div>
+        <span className="text-sm font-medium tracking-tight">Explainability</span>
         {toolResult && (
           <Badge variant="secondary" className="ml-auto text-[10px] font-mono">
             {toolResult.toolName}
@@ -56,15 +64,15 @@ export function ExplainPanel({ toolResult, allResults = [] }: ExplainPanelProps)
             <DefaultOverview />
           ) : (
             <>
-              {/* Latest result gets full treatment */}
               {toolResult && (
-                <ExplainContent
-                  toolName={toolResult.toolName}
-                  result={toolResult.result}
-                />
+                <div className="animate-fade-in-up">
+                  <ExplainContent
+                    toolName={toolResult.toolName}
+                    result={toolResult.result}
+                  />
+                </div>
               )}
 
-              {/* Previous results as collapsed summaries */}
               {allResults.length > 1 && (
                 <>
                   <Separator />
@@ -72,7 +80,9 @@ export function ExplainPanel({ toolResult, allResults = [] }: ExplainPanelProps)
                     Earlier results ({allResults.length - 1})
                   </p>
                   {allResults.slice(0, -1).reverse().map((tr, i) => (
-                    <PreviousResultCard key={i} toolName={tr.toolName} result={tr.result} />
+                    <div key={i} className="animate-fade-in" style={{ animationDelay: `${i * 0.05}s` }}>
+                      <PreviousResultCard toolName={tr.toolName} result={tr.result} />
+                    </div>
                   ))}
                 </>
               )}
@@ -81,9 +91,9 @@ export function ExplainPanel({ toolResult, allResults = [] }: ExplainPanelProps)
         </div>
       </ScrollArea>
 
-      <div className="border-t px-4 py-2 flex items-center gap-1.5 text-[10px] text-muted-foreground shrink-0">
-        <Shield className="h-3 w-3" />
-        Governed output — no raw PHI exposed
+      <div className="border-t px-4 py-2.5 flex items-center gap-1.5 text-[10px] text-muted-foreground shrink-0">
+        <Shield className="h-3 w-3 text-primary/60" />
+        Governed output &mdash; no raw PHI exposed
       </div>
     </div>
   );
@@ -91,50 +101,46 @@ export function ExplainPanel({ toolResult, allResults = [] }: ExplainPanelProps)
 
 function DefaultOverview() {
   return (
-    <div className="space-y-4">
-      <Card>
+    <div className="space-y-4 animate-fade-in">
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs flex items-center gap-1.5">
-            <Database className="h-3.5 w-3.5" />
+            <Database className="h-3.5 w-3.5 text-primary" />
             Dataset Overview
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-xs space-y-1.5">
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Members</span>
-            <span className="font-mono">500</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">States</span>
-            <span className="font-mono">TX, FL, CA, NY</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Risk tiers</span>
-            <span className="font-mono">high / medium / low</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">Total records</span>
-            <span className="font-mono">~4,700</span>
-          </div>
+        <CardContent className="text-xs space-y-2">
+          {[
+            { label: "Members", value: "500" },
+            { label: "States", value: "TX, FL, CA, NY, GA" },
+            { label: "Risk tiers", value: "high / medium / low" },
+            { label: "Total records", value: "~6,500" },
+          ].map((row) => (
+            <div key={row.label} className="flex justify-between items-center">
+              <span className="text-muted-foreground">{row.label}</span>
+              <span className="font-mono text-foreground/80">{row.value}</span>
+            </div>
+          ))}
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs flex items-center gap-1.5">
-            <Activity className="h-3.5 w-3.5" />
+            <Activity className="h-3.5 w-3.5 text-primary" />
             Data Sources
           </CardTitle>
         </CardHeader>
-        <CardContent className="text-xs space-y-1">
+        <CardContent className="text-xs space-y-1.5">
           {[
             { name: "Claims", desc: "ICD-10, CPT, amounts, providers" },
             { name: "Pharmacy", desc: "Drug names, adherence %, fill dates" },
             { name: "SDOH", desc: "Transportation, food, housing flags" },
             { name: "Call Center", desc: "Reason, sentiment, dates" },
+            { name: "Utilization", desc: "ER, inpatient, PCP visits" },
           ].map((s) => (
             <div key={s.name} className="flex items-start gap-2">
-              <Badge variant="outline" className="text-[9px] shrink-0 mt-0.5">
+              <Badge variant="outline" className="text-[9px] shrink-0 mt-0.5 border-primary/20 text-primary">
                 {s.name}
               </Badge>
               <span className="text-muted-foreground">{s.desc}</span>
@@ -143,7 +149,7 @@ function DefaultOverview() {
         </CardContent>
       </Card>
 
-      <p className="text-xs text-muted-foreground text-center px-2">
+      <p className="text-xs text-muted-foreground text-center px-2 leading-relaxed">
         Ask a question to see risk drivers, member explanations, and outreach recommendations here.
       </p>
     </div>
@@ -153,7 +159,7 @@ function DefaultOverview() {
 function PreviousResultCard({ toolName, result }: { toolName: string; result: any }) {
   const summary = getResultSummary(toolName, result);
   return (
-    <div className="rounded-lg border p-2.5 text-xs space-y-0.5">
+    <div className="rounded-xl border border-border/60 p-2.5 text-xs space-y-0.5 hover:border-primary/20 transition-colors duration-150">
       <div className="flex items-center gap-1.5">
         <Badge variant="secondary" className="text-[9px] font-mono">
           {toolName}
@@ -220,10 +226,10 @@ function CohortExplain({ result }: { result: any }) {
 
   return (
     <div className="space-y-4">
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs flex items-center gap-1.5">
-            <Users className="h-3.5 w-3.5" />
+            <Users className="h-3.5 w-3.5 text-primary" />
             Cohort Summary
           </CardTitle>
         </CardHeader>
@@ -241,7 +247,7 @@ function CohortExplain({ result }: { result: any }) {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs">SDOH Drivers in Cohort</CardTitle>
         </CardHeader>
@@ -252,7 +258,7 @@ function CohortExplain({ result }: { result: any }) {
                 <XAxis type="number" tick={{ fontSize: 9 }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 9 }} width={75} />
                 <Tooltip />
-                <Bar dataKey="value" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="value" fill="oklch(0.65 0.17 200)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -260,7 +266,7 @@ function CohortExplain({ result }: { result: any }) {
       </Card>
 
       {members.length > 0 && (
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs">Top Members</CardTitle>
           </CardHeader>
@@ -279,7 +285,7 @@ function DriversExplain({ result }: { result: any }) {
   return (
     <div className="space-y-4">
       {result?.member && <MemberCard member={result.member} />}
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs">Risk Drivers</CardTitle>
         </CardHeader>
@@ -290,7 +296,7 @@ function DriversExplain({ result }: { result: any }) {
                 <XAxis type="number" domain={[0, 1]} tick={{ fontSize: 9 }} />
                 <YAxis type="category" dataKey="name" tick={{ fontSize: 9 }} width={85} />
                 <Tooltip />
-                <Bar dataKey="score" fill="hsl(var(--primary))" radius={[0, 4, 4, 0]} />
+                <Bar dataKey="score" fill="oklch(0.65 0.17 200)" radius={[0, 4, 4, 0]} />
               </BarChart>
             </ResponsiveContainer>
           </div>
@@ -298,7 +304,7 @@ function DriversExplain({ result }: { result: any }) {
       </Card>
       {result?.avgAdherencePct != null && (
         <div className="text-xs text-muted-foreground">
-          Avg medication adherence: <span className="font-mono font-medium">{result.avgAdherencePct.toFixed(1)}%</span>
+          Avg medication adherence: <span className="font-mono font-medium text-foreground">{result.avgAdherencePct.toFixed(1)}%</span>
         </div>
       )}
     </div>
@@ -309,10 +315,10 @@ function OutreachExplain({ result }: { result: any }) {
   return (
     <div className="space-y-3">
       <p className="text-xs text-muted-foreground">
-        Outreach plan for <strong>{result?.memberName ?? "member"}</strong>
+        Outreach plan for <strong className="text-foreground">{result?.memberName ?? "member"}</strong>
       </p>
       {(result?.recommendations ?? []).map((r: any, i: number) => (
-        <Card key={i}>
+        <Card key={i} className="border-border/60 shadow-sm">
           <CardContent className="pt-3 text-xs space-y-1">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-3 w-3 text-muted-foreground" />
@@ -345,8 +351,8 @@ function MemberExplain({ result }: { result: any }) {
   return (
     <div className="space-y-4">
       {sections.overview && (
-        <Card>
-          <CardContent className="pt-3 text-xs text-muted-foreground">
+        <Card className="border-border/60 shadow-sm">
+          <CardContent className="pt-3 text-xs text-muted-foreground leading-relaxed">
             {sections.overview.summary}
           </CardContent>
         </Card>
@@ -368,7 +374,7 @@ function MemberExplain({ result }: { result: any }) {
       )}
 
       {sections.sdoh && (
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs">Social Determinants</CardTitle>
           </CardHeader>
@@ -390,7 +396,7 @@ function MemberExplain({ result }: { result: any }) {
       )}
 
       {sections.pharmacy?.fills?.length > 0 && (
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs">Pharmacy ({sections.pharmacy.fills.length} fills)</CardTitle>
           </CardHeader>
@@ -411,7 +417,7 @@ function MemberExplain({ result }: { result: any }) {
       )}
 
       {sections.claims && (
-        <Card>
+        <Card className="border-border/60 shadow-sm">
           <CardHeader className="pb-2">
             <CardTitle className="text-xs">Claims Summary</CardTitle>
           </CardHeader>
@@ -446,10 +452,10 @@ function ChartExplain({ result }: { result: any }) {
 
   return (
     <div className="space-y-3">
-      <Card>
+      <Card className="border-border/60 shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle className="text-xs flex items-center gap-1.5">
-            <BarChart3 className="h-3.5 w-3.5" />
+            <BarChart3 className="h-3.5 w-3.5 text-primary" />
             {result?.title ?? "Chart"}
           </CardTitle>
         </CardHeader>
@@ -470,7 +476,7 @@ function ChartExplain({ result }: { result: any }) {
                   <XAxis dataKey="name" tick={{ fontSize: 9 }} />
                   <YAxis tick={{ fontSize: 9 }} />
                   <Tooltip />
-                  <Bar dataKey="value" fill="hsl(var(--primary))" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="value" fill="oklch(0.65 0.17 200)" radius={[4, 4, 0, 0]} />
                 </BarChart>
               )}
             </ResponsiveContainer>
@@ -494,7 +500,7 @@ function ChartExplain({ result }: { result: any }) {
 
 function MemberCard({ member }: { member: any }) {
   return (
-    <div className="rounded-lg border p-2.5 text-xs space-y-1">
+    <div className="rounded-xl border border-border/60 p-3 text-xs space-y-1.5 bg-card shadow-sm">
       <div className="flex items-center justify-between">
         <span className="font-mono text-muted-foreground">{member.id}</span>
         {member.riskTier && (
@@ -502,13 +508,13 @@ function MemberCard({ member }: { member: any }) {
             variant={member.riskTier === "high" ? "destructive" : "secondary"}
             className="text-[10px]"
           >
-            {member.riskTier} — {member.riskScore?.toFixed(2)}
+            {member.riskTier} &mdash; {member.riskScore?.toFixed(2)}
           </Badge>
         )}
       </div>
       {member.name && <p className="font-medium">{member.name}</p>}
       <p className="text-muted-foreground">
-        {member.age}y {member.gender} — {member.state}
+        {member.age}y {member.gender} &mdash; {member.state}
       </p>
       {member.chronicConditions && (
         <p className="text-muted-foreground">{member.chronicConditions}</p>

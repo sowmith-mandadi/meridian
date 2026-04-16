@@ -20,6 +20,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { AppNav } from "@/components/app-nav";
 
 type FeedbackRow = {
   id: string;
@@ -104,7 +105,9 @@ export default function FeedbackPage() {
   }
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-5xl flex-col gap-8 p-6">
+    <div className="min-h-screen flex flex-col bg-background">
+      <AppNav />
+      <div className="mx-auto flex flex-1 max-w-5xl flex-col gap-8 p-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
           Feedback Requests
@@ -223,6 +226,7 @@ export default function FeedbackPage() {
           </div>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

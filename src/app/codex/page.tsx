@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import Link from "next/link";
+import { AppNav } from "@/components/app-nav";
 
 const SUBAGENTS = [
   {
@@ -145,6 +146,7 @@ const FLOW_STEPS = [
 export default function CodexPage() {
   return (
     <div className="min-h-screen bg-background">
+      <AppNav />
       {/* Hero */}
       <header className="border-b px-6 py-10 text-center">
         <div className="mx-auto max-w-3xl space-y-3">

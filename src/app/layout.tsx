@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { TooltipProvider } from "@/components/ui/tooltip";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -27,10 +28,14 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} dark h-full`}
+      className={`${geistSans.variable} ${geistMono.variable} h-full`}
+      // @ts-expect-error next-themes requires suppressHydrationMismatch on html
+      suppressHydrationMismatch
     >
-      <body className="min-h-full bg-background text-foreground antialiased">
-        <TooltipProvider>{children}</TooltipProvider>
+      <body className="min-h-full bg-background text-foreground antialiased transition-colors duration-300">
+        <ThemeProvider>
+          <TooltipProvider>{children}</TooltipProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

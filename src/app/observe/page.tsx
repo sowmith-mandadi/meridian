@@ -27,6 +27,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { AppNav } from "@/components/app-nav";
 
 type UsageRow = {
   id: string;
@@ -114,7 +115,9 @@ export default function ObservePage() {
   }, [logs]);
 
   return (
-    <div className="mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl flex-col gap-8 p-6">
+    <div className="min-h-screen flex flex-col bg-background">
+      <AppNav />
+      <div className="mx-auto flex flex-1 max-w-6xl flex-col gap-8 p-6">
       <div>
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
           Observability
@@ -301,6 +304,7 @@ export default function ObservePage() {
           </p>
         </CardContent>
       </Card>
+    </div>
     </div>
   );
 }

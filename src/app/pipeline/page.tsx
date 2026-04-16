@@ -26,6 +26,7 @@ import {
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
+import { AppNav } from "@/components/app-nav";
 
 type StepStatus = "idle" | "running" | "completed" | "failed";
 
@@ -176,6 +177,7 @@ export default function PipelinePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <AppNav />
       {/* Header */}
       <header className="border-b px-6 py-5 flex items-center justify-between">
         <div>

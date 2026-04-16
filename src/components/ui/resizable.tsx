@@ -40,14 +40,14 @@ function ResizableHandle({
   return (
     <Separator
       className={cn(
-        "relative flex w-px items-center justify-center bg-border after:absolute after:inset-y-0 after:-left-1 after:-right-1 after:content-[''] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring",
+        "relative flex w-px items-center justify-center bg-border/50 after:absolute after:inset-y-0 after:-left-1 after:-right-1 after:content-[''] focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring hover:bg-primary/30 transition-colors duration-150",
         className
       )}
       {...props}
     >
       {withHandle && (
-        <div className="z-10 flex h-4 w-3 items-center justify-center rounded-sm border bg-border">
-          <GripVertical className="h-2.5 w-2.5" />
+        <div className="z-10 flex h-5 w-3.5 items-center justify-center rounded-md border border-border/60 bg-card shadow-sm hover:bg-muted transition-colors duration-150">
+          <GripVertical className="h-2.5 w-2.5 text-muted-foreground" />
         </div>
       )}
     </Separator>

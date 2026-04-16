@@ -35,6 +35,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
+import { AppNav } from "@/components/app-nav";
 
 type Role = "care_manager" | "analyst" | "quality" | "admin";
 
@@ -128,6 +129,7 @@ export default function CollaboratePage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
+      <AppNav />
       <header className="border-b border-border/80 bg-card/40 px-6 py-6">
         <h1 className="font-heading text-2xl font-semibold tracking-tight">
           Agent-to-Agent Collaboration

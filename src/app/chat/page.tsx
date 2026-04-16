@@ -27,7 +27,7 @@ function newId() {
 export default function ChatPage() {
   const [chatId, setChatId] = useState(() => newId());
   const [history, setHistory] = useState<SavedChat[]>([]);
-  const [showExplain, setShowExplain] = useState(true);
+  const [showExplain, setShowExplain] = useState(false);
   const initialized = useRef(false);
 
   const chat = useChat({ id: chatId });
@@ -115,9 +115,9 @@ export default function ChatPage() {
   }
 
   return (
-    <div className="h-screen w-screen overflow-hidden">
+    <div className="h-screen w-screen overflow-hidden bg-background">
       <ResizablePanelGroup orientation="horizontal">
-        <ResizablePanel defaultSize={15} minSize="200px" maxSize="260px">
+        <ResizablePanel defaultSize={15} minSize="200px" maxSize="280px">
           <div className="h-full overflow-hidden">
             <ChatSidebar
               onNewChat={handleNewChat}
@@ -132,7 +132,7 @@ export default function ChatPage() {
         </ResizablePanel>
         <ResizableHandle withHandle />
         <ResizablePanel defaultSize={showExplain ? 55 : 80} minSize="400px">
-          <div className="flex h-full flex-col overflow-hidden">
+          <div className="flex h-full flex-col overflow-hidden bg-background">
             <ChatTranscript messages={messages} status={status} />
             <ChatInput
               onSend={handleSend}
@@ -143,7 +143,7 @@ export default function ChatPage() {
         {showExplain && (
           <>
             <ResizableHandle withHandle />
-            <ResizablePanel defaultSize={18} minSize="220px" maxSize="300px">
+            <ResizablePanel defaultSize={20} minSize="240px" maxSize="340px">
               <div className="h-full overflow-hidden">
                 <ExplainPanel toolResult={lastToolResult} allResults={allToolResults} />
               </div>
