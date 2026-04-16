@@ -1,18 +1,22 @@
 "use client";
 
-import * as React from "react";
+import { useState, useCallback } from "react";
 import {
   BarChart3,
   Check,
-  ChevronDown,
   ChevronRight,
   Database,
   GitMerge,
   Link2,
   Loader2,
+  Play,
   ShieldCheck,
+  Clock,
+  Zap,
+  RotateCcw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -23,88 +27,56 @@ import {
 import { Separator } from "@/components/ui/separator";
 import { cn } from "@/lib/utils";
 
-type StepStatus = "completed" | "running" | "pending";
+type StepStatus = "idle" | "running" | "completed" | "failed";
 
-type PipelineStep = {
+interface StepResult {
+  step: string;
+  status: string;
+  durationMs: number;
+  output: Record<string, unknown>;
+}
+
+interface PipelineStep {
   id: string;
   name: string;
   icon: React.ElementType;
   status: StepStatus;
-  detail: string;
-};
+  description: string;
+  result: StepResult | null;
+}
 
-const STEPS: PipelineStep[] = [
+const STEP_DEFS: Omit<PipelineStep, "status" | "result">[] = [
   {
     id: "ingest",
     name: "Ingest",
     icon: Database,
-    status: "completed",
-    detail:
-      "Claims, pharmacy, SDOH, and call-center feeds landed in the raw zone with checksum validation and lineage IDs attached.",
+    description: "Pull raw records from all source tables and validate checksums",
   },
   {
     id: "profile",
     name: "Profile",
     icon: BarChart3,
-    status: "completed",
-    detail:
-      "Column-level stats, null rates, and distribution snapshots computed for downstream standardization rules.",
+    description: "Compute column stats, null rates, and distribution snapshots",
   },
   {
     id: "standardize",
     name: "Standardize",
     icon: GitMerge,
-    status: "completed",
-    detail:
-      "ICD-10/CPT/NDC normalized to reference vocabularies; dates aligned to analytics calendar.",
+    description: "Validate ICD-10/NDC codes and normalize date formats",
   },
   {
-    id: "entity-resolve",
+    id: "entity_resolve",
     name: "Entity Resolve",
     icon: Link2,
-    status: "completed",
-    detail:
-      "Member keys reconciled across sources with deterministic merge rules and conflict surfacing.",
+    description: "Link member records across all data sources",
   },
   {
     id: "validate",
     name: "Validate",
     icon: ShieldCheck,
-    status: "completed",
-    detail:
-      "Quality gates on grain, referential integrity, and business rules before publishing the analytics-ready dataset.",
+    description: "Run quality gates: grain, referential integrity, business rules",
   },
 ];
-
-function StatusBadge({ status }: { status: StepStatus }) {
-  if (status === "completed") {
-    return (
-      <Badge
-        variant="secondary"
-        className="border-emerald-500/30 bg-emerald-500/15 text-emerald-400 [&>svg]:text-emerald-400"
-      >
-        <Check className="size-3" aria-hidden />
-        Completed
-      </Badge>
-    );
-  }
-  if (status === "running") {
-    return (
-      <Badge
-        variant="secondary"
-        className="border-amber-500/30 bg-amber-500/15 text-amber-300 [&>svg]:text-amber-300"
-      >
-        <Loader2 className="size-3 animate-spin" aria-hidden />
-        Running
-      </Badge>
-    );
-  }
-  return (
-    <Badge variant="outline" className="text-muted-foreground">
-      Pending
-    </Badge>
-  );
-}
 
 const TECH_SPECS = `pipeline:
   name: hospitalization_risk_prediction
@@ -121,78 +93,172 @@ const TECH_SPECS = `pipeline:
     target: hospital_visit_6mo`;
 
 export default function PipelinePage() {
-  const [selectedId, setSelectedId] = React.useState<string | null>(
-    STEPS[0]?.id ?? null
+  const [steps, setSteps] = useState<PipelineStep[]>(
+    STEP_DEFS.map((d) => ({ ...d, status: "idle", result: null }))
   );
+  const [selectedId, setSelectedId] = useState<string>("ingest");
+  const [running, setRunning] = useState(false);
+  const [summary, setSummary] = useState<StepResult | null>(null);
 
-  const selected = STEPS.find((s) => s.id === selectedId) ?? STEPS[0];
+  const selected = steps.find((s) => s.id === selectedId) ?? steps[0];
+
+  const runPipeline = useCallback(async () => {
+    setRunning(true);
+    setSummary(null);
+    setSteps((prev) =>
+      prev.map((s) => ({ ...s, status: "idle", result: null }))
+    );
+
+    try {
+      const res = await fetch("/api/pipeline", { method: "POST" });
+      if (!res.ok || !res.body) throw new Error("Pipeline request failed");
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = "";
+      let stepIndex = 0;
+
+      // Mark first step as running
+      setSteps((prev) =>
+        prev.map((s, i) => (i === 0 ? { ...s, status: "running" } : s))
+      );
+      setSelectedId(STEP_DEFS[0].id);
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        buffer += decoder.decode(value, { stream: true });
+
+        const lines = buffer.split("\n");
+        buffer = lines.pop() ?? "";
+
+        for (const line of lines) {
+          if (!line.trim()) continue;
+          const result: StepResult = JSON.parse(line);
+
+          if (result.step === "summary") {
+            setSummary(result);
+            continue;
+          }
+
+          const currentIndex = stepIndex;
+          setSteps((prev) =>
+            prev.map((s, i) => {
+              if (i === currentIndex) {
+                return {
+                  ...s,
+                  status: result.status === "completed" ? "completed" : "failed",
+                  result,
+                };
+              }
+              if (i === currentIndex + 1) {
+                return { ...s, status: "running" };
+              }
+              return s;
+            })
+          );
+          setSelectedId(result.step);
+          stepIndex++;
+        }
+      }
+    } catch (err) {
+      console.error("Pipeline error:", err);
+    } finally {
+      setRunning(false);
+    }
+  }, []);
+
+  const reset = useCallback(() => {
+    setSteps(STEP_DEFS.map((d) => ({ ...d, status: "idle", result: null })));
+    setSummary(null);
+    setSelectedId("ingest");
+  }, []);
 
   return (
     <div className="flex min-h-screen flex-col bg-background">
-      <header className="border-b border-border/80 bg-card/40 px-6 py-6">
-        <h1 className="font-heading text-2xl font-semibold tracking-tight">
-          Agentic Data Pipeline
-        </h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted-foreground">
-          End-to-end orchestration from governed ingest through validation for
-          analytics-ready healthcare datasets.
-        </p>
+      {/* Header */}
+      <header className="border-b px-6 py-5 flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Agentic Data Pipeline
+          </h1>
+          <p className="mt-1 text-sm text-muted-foreground">
+            End-to-end orchestration with real database queries against{" "}
+            {steps[0]?.result
+              ? `${(steps[0].result.output as any).total_records?.toLocaleString()} records`
+              : "live data"}
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {summary && (
+            <Button variant="outline" size="sm" onClick={reset}>
+              <RotateCcw className="h-3.5 w-3.5 mr-1.5" />
+              Reset
+            </Button>
+          )}
+          <Button onClick={runPipeline} disabled={running} size="sm">
+            {running ? (
+              <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+            ) : (
+              <Play className="h-3.5 w-3.5 mr-1.5" />
+            )}
+            {running ? "Running..." : "Run Pipeline"}
+          </Button>
+        </div>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col lg:flex-row">
-        <div className="flex flex-1 flex-col items-center justify-center gap-6 px-4 py-8 lg:px-8">
-          <div className="flex w-full max-w-6xl flex-col items-center gap-0 md:flex-row md:items-center md:justify-between md:gap-2">
-            {STEPS.map((step, index) => {
+        {/* DAG */}
+        <div className="flex flex-1 items-center justify-center px-4 py-8">
+          <div className="flex w-full max-w-5xl flex-col items-center gap-0 md:flex-row md:items-center md:justify-between md:gap-2">
+            {steps.map((step, index) => {
               const Icon = step.icon;
               const isSelected = selectedId === step.id;
               return (
-                <React.Fragment key={step.id}>
+                <div key={step.id} className="flex items-center gap-0 md:gap-2">
                   <button
                     type="button"
                     onClick={() => setSelectedId(step.id)}
                     className={cn(
-                      "flex w-full max-w-sm flex-col items-center gap-3 rounded-xl border p-4 text-left transition-colors md:max-w-[160px] md:min-w-[140px]",
-                      "ring-1 ring-foreground/10 hover:bg-muted/40",
-                      isSelected &&
-                        "bg-muted/50 ring-2 ring-primary/40 ring-offset-2 ring-offset-background"
+                      "flex w-full flex-col items-center gap-2.5 rounded-xl border p-4 transition-all md:w-[140px]",
+                      "hover:bg-muted/40",
+                      isSelected && "ring-2 ring-primary/40 ring-offset-2 ring-offset-background bg-muted/50",
+                      step.status === "completed" && "border-emerald-500/30",
+                      step.status === "running" && "border-amber-500/30",
+                      step.status === "failed" && "border-destructive/30"
                     )}
                   >
                     <div
                       className={cn(
-                        "flex size-12 items-center justify-center rounded-lg border bg-background",
-                        isSelected ? "border-primary/50" : "border-border"
+                        "flex h-11 w-11 items-center justify-center rounded-lg border",
+                        step.status === "completed"
+                          ? "border-emerald-500/40 bg-emerald-500/10"
+                          : step.status === "running"
+                          ? "border-amber-500/40 bg-amber-500/10"
+                          : "border-border bg-background"
                       )}
                     >
-                      <Icon className="size-6 text-primary" aria-hidden />
+                      {step.status === "running" ? (
+                        <Loader2 className="h-5 w-5 text-amber-400 animate-spin" />
+                      ) : step.status === "completed" ? (
+                        <Check className="h-5 w-5 text-emerald-400" />
+                      ) : (
+                        <Icon className="h-5 w-5 text-muted-foreground" />
+                      )}
                     </div>
-                    <div className="flex w-full flex-col items-center gap-2">
-                      <span className="text-center font-medium leading-tight">
-                        {step.name}
-                      </span>
-                      <StatusBadge status={step.status} />
-                    </div>
+                    <span className="text-xs font-medium text-center leading-tight">
+                      {step.name}
+                    </span>
+                    <StepStatusBadge status={step.status} durationMs={step.result?.durationMs} />
                   </button>
-                  {index < STEPS.length - 1 ? (
-                    <>
-                      <div
-                        className="flex h-10 flex-col items-center justify-center md:hidden"
-                        aria-hidden
-                      >
-                        <div className="h-3 w-px shrink-0 bg-border" />
-                        <ChevronDown className="size-4 text-muted-foreground" />
-                        <div className="h-3 w-px shrink-0 bg-border" />
-                      </div>
-                      <div
-                        className="hidden h-px min-w-[20px] flex-1 items-center md:flex"
-                        aria-hidden
-                      >
-                        <div className="h-px flex-1 bg-border" />
-                        <ChevronRight className="mx-1 size-4 shrink-0 text-muted-foreground" />
-                        <div className="h-px flex-1 bg-border" />
-                      </div>
-                    </>
-                  ) : null}
-                </React.Fragment>
+                  {index < steps.length - 1 && (
+                    <div className="hidden md:flex items-center px-1" aria-hidden>
+                      <div className="h-px w-4 bg-border" />
+                      <ChevronRight className="h-3.5 w-3.5 text-muted-foreground" />
+                      <div className="h-px w-4 bg-border" />
+                    </div>
+                  )}
+                </div>
               );
             })}
           </div>
@@ -200,43 +266,226 @@ export default function PipelinePage() {
 
         <Separator orientation="vertical" className="hidden lg:block" />
 
-        <aside className="w-full shrink-0 border-t border-border lg:w-96 lg:border-l lg:border-t-0">
-          <div className="sticky top-0 flex h-full min-h-[280px] flex-col gap-4 p-6">
+        {/* Detail panel */}
+        <aside className="w-full shrink-0 border-t lg:w-[400px] lg:border-l lg:border-t-0 overflow-y-auto">
+          <div className="p-5 space-y-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
                 Step details
               </p>
-              <h2 className="mt-1 font-heading text-lg font-semibold">
-                {selected?.name ?? "Select a step"}
-              </h2>
+              <h2 className="mt-1 text-lg font-semibold">{selected.name}</h2>
+              <p className="text-sm text-muted-foreground mt-1">
+                {selected.description}
+              </p>
             </div>
-            <p className="text-sm leading-relaxed text-muted-foreground">
-              {selected?.detail}
-            </p>
-            <div className="mt-auto rounded-lg border border-dashed border-border/80 bg-muted/30 p-3 text-xs text-muted-foreground">
-              Click any node in the DAG to inspect ingest, profiling, and
-              validation context for that stage.
-            </div>
+
+            {selected.result ? (
+              <StepOutput result={selected.result} />
+            ) : selected.status === "running" ? (
+              <div className="flex items-center gap-2 text-sm text-amber-400 py-4">
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Querying database...
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground py-4">
+                Click &ldquo;Run Pipeline&rdquo; to execute this step with real data.
+              </p>
+            )}
           </div>
         </aside>
       </div>
 
-      <section className="border-t border-border bg-muted/20 px-4 py-8">
-        <Card className="mx-auto max-w-4xl">
-          <CardHeader>
-            <CardTitle className="font-mono text-sm">tech_specs.yml</CardTitle>
-            <CardDescription>
-              Declarative pipeline contract for the hospitalization risk
-              feature set.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <pre className="max-h-[min(420px,50vh)] overflow-auto rounded-lg border bg-background p-4 font-mono text-xs leading-relaxed text-foreground">
-              {TECH_SPECS}
-            </pre>
-          </CardContent>
-        </Card>
+      {/* Summary + Tech Specs */}
+      <section className="border-t bg-muted/20 px-4 py-6">
+        <div className="mx-auto max-w-5xl grid gap-4 md:grid-cols-2">
+          {/* Summary card */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-sm flex items-center gap-2">
+                <Zap className="h-4 w-4" />
+                Pipeline Summary
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {summary ? (
+                <div className="space-y-2 text-sm">
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Steps</span>
+                    <span className="font-mono">
+                      {(summary.output as any).stepsCompleted}/{(summary.output as any).stepsTotal}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Total time</span>
+                    <span className="font-mono">
+                      {(summary.output as any).totalDurationMs}ms
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Quality score</span>
+                    <span className="font-mono text-emerald-400">
+                      {(summary.output as any).qualityScore}
+                    </span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-muted-foreground">Ready for modeling</span>
+                    <Badge
+                      variant={
+                        (summary.output as any).readyForModeling
+                          ? "secondary"
+                          : "destructive"
+                      }
+                      className={cn(
+                        "text-[10px]",
+                        (summary.output as any).readyForModeling &&
+                          "bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+                      )}
+                    >
+                      {(summary.output as any).readyForModeling ? "Yes" : "No"}
+                    </Badge>
+                  </div>
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground">
+                  Run the pipeline to see results.
+                </p>
+              )}
+            </CardContent>
+          </Card>
+
+          {/* Tech specs */}
+          <Card>
+            <CardHeader className="pb-2">
+              <CardTitle className="font-mono text-sm">tech_specs.yml</CardTitle>
+              <CardDescription className="text-xs">
+                Declarative pipeline contract
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <pre className="overflow-auto rounded-lg border bg-background p-3 font-mono text-[11px] leading-relaxed text-foreground max-h-[200px]">
+                {TECH_SPECS}
+              </pre>
+            </CardContent>
+          </Card>
+        </div>
       </section>
+    </div>
+  );
+}
+
+function StepStatusBadge({
+  status,
+  durationMs,
+}: {
+  status: StepStatus;
+  durationMs?: number;
+}) {
+  if (status === "completed") {
+    return (
+      <Badge
+        variant="secondary"
+        className="text-[10px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+      >
+        <Check className="h-2.5 w-2.5 mr-0.5" />
+        {durationMs != null ? `${durationMs}ms` : "Done"}
+      </Badge>
+    );
+  }
+  if (status === "running") {
+    return (
+      <Badge
+        variant="secondary"
+        className="text-[10px] bg-amber-500/15 text-amber-300 border-amber-500/30"
+      >
+        <Loader2 className="h-2.5 w-2.5 mr-0.5 animate-spin" />
+        Running
+      </Badge>
+    );
+  }
+  if (status === "failed") {
+    return (
+      <Badge variant="destructive" className="text-[10px]">
+        Failed
+      </Badge>
+    );
+  }
+  return (
+    <Badge variant="outline" className="text-[10px] text-muted-foreground">
+      <Clock className="h-2.5 w-2.5 mr-0.5" />
+      Idle
+    </Badge>
+  );
+}
+
+function StepOutput({ result }: { result: StepResult }) {
+  const output = result.output;
+
+  return (
+    <div className="space-y-3">
+      <div className="flex items-center gap-2 text-xs">
+        <Badge
+          variant="secondary"
+          className="text-[10px] bg-emerald-500/15 text-emerald-400 border-emerald-500/30"
+        >
+          Completed in {result.durationMs}ms
+        </Badge>
+      </div>
+      <div className="rounded-lg border bg-muted/30 p-3 space-y-1.5">
+        {Object.entries(output).map(([key, value]) => (
+          <OutputRow key={key} label={key} value={value} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OutputRow({ label, value }: { label: string; value: unknown }) {
+  const displayLabel = label
+    .replace(/_/g, " ")
+    .replace(/([A-Z])/g, " $1")
+    .trim();
+
+  if (value && typeof value === "object" && !Array.isArray(value)) {
+    return (
+      <div className="space-y-1">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {displayLabel}
+        </p>
+        <div className="pl-2 border-l border-border/50 space-y-1">
+          {Object.entries(value as Record<string, unknown>).map(([k, v]) => (
+            <OutputRow key={k} label={k} value={v} />
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (Array.isArray(value)) {
+    return (
+      <div className="space-y-1">
+        <p className="text-[10px] font-medium uppercase tracking-wider text-muted-foreground">
+          {displayLabel}
+        </p>
+        {value.map((item, i) => (
+          <div
+            key={i}
+            className="text-xs font-mono text-foreground/80 pl-2 border-l border-border/50"
+          >
+            {typeof item === "object"
+              ? Object.entries(item)
+                  .map(([k, v]) => `${k}: ${v}`)
+                  .join(" · ")
+              : String(item)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  return (
+    <div className="flex items-center justify-between text-xs">
+      <span className="text-muted-foreground">{displayLabel}</span>
+      <span className="font-mono text-foreground/90">{String(value)}</span>
     </div>
   );
 }

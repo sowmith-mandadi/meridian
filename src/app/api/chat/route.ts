@@ -14,6 +14,7 @@ import {
   members,
   pharmacy,
   sdoh,
+  usageLog,
 } from "@/lib/schema";
 
 const MERIDIAN_SYSTEM = `You are Meridian, a governed healthcare AI assistant. Meridian helps care teams explore population health, understand member-level risk, and plan outreach in a responsible, policy-aware way. Always respect privacy and clinical appropriateness: do not invent PHI, cite tools and data when making quantitative claims, and encourage human review for clinical or coverage decisions.`;
@@ -433,6 +434,7 @@ const meridianTools = {
 };
 
 export async function POST(req: Request) {
+  const startMs = Date.now();
   const body = await req.json();
   const { messages } = body as { messages?: unknown };
   if (!Array.isArray(messages)) {
@@ -442,12 +444,34 @@ export async function POST(req: Request) {
     });
   }
 
+  const lastUserMsg =
+    [...(messages as any[])].reverse().find((m) => m.role === "user");
+  const queryText =
+    lastUserMsg?.parts?.find((p: any) => p.type === "text")?.text ??
+    lastUserMsg?.content ??
+    "unknown";
+
   const result = streamText({
     model: openai("gpt-4o-mini"),
     system: MERIDIAN_SYSTEM,
     messages: await convertToModelMessages(messages, { tools: meridianTools }),
     tools: meridianTools,
     stopWhen: stepCountIs(20),
+    async onFinish({ usage }) {
+      try {
+        await db.insert(usageLog).values({
+          id: crypto.randomUUID(),
+          queryText: String(queryText).slice(0, 500),
+          tokensIn: usage?.inputTokens ?? 0,
+          tokensOut: usage?.outputTokens ?? 0,
+          latencyMs: Date.now() - startMs,
+          model: "gpt-4o-mini",
+          createdAt: new Date().toISOString(),
+        });
+      } catch {
+        // non-critical — don't fail the chat if logging fails
+      }
+    },
   });
 
   return result.toUIMessageStreamResponse();

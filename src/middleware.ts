@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const PROTECTED_PATHS = ["/chat", "/pipeline", "/collaborate", "/feedback", "/observe"];
+const PROTECTED_PATHS = ["/chat", "/pipeline", "/collaborate", "/feedback", "/observe", "/codex"];
 
 export function middleware(request: NextRequest) {
   const sessionToken =
@@ -26,5 +26,6 @@ export const config = {
     "/collaborate/:path*",
     "/feedback/:path*",
     "/observe/:path*",
+    "/codex/:path*",
   ],
 };
