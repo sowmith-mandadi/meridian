@@ -32,7 +32,7 @@ export function AppNav() {
 
   return (
     <nav className="sticky top-0 z-50 border-b bg-background/80 glass">
-      <div className="mx-auto flex h-12 max-w-7xl items-center gap-1 px-4">
+      <div className="flex h-12 w-full items-center gap-1 px-6">
         <Link
           href="/chat"
           className="flex items-center gap-2 mr-4 shrink-0"
