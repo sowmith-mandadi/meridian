@@ -198,6 +198,11 @@ async function seed() {
   await db.run(sql`DELETE FROM ${schema.feedbackRequests}`);
   await db.run(sql`DELETE FROM ${schema.auditLog}`);
   await db.run(sql`DELETE FROM ${schema.pipelineRuns}`);
+  await db.run(sql`DELETE FROM ${schema.stagingQuarantine}`);
+  await db.run(sql`DELETE FROM ${schema.rawClaims}`);
+  await db.run(sql`DELETE FROM ${schema.rawPharmacy}`);
+  await db.run(sql`DELETE FROM ${schema.dataProducts}`);
+  await db.run(sql`DELETE FROM ${schema.customSources}`);
   await db.run(sql`DELETE FROM ${schema.callCenter}`);
   await db.run(sql`DELETE FROM ${schema.utilization}`);
   await db.run(sql`DELETE FROM ${schema.sdoh}`);
@@ -475,6 +480,136 @@ async function seed() {
     await db.insert(schema.utilization).values(utilizationRows.slice(i, i + BATCH));
   }
   console.log(`  Utilization: ${utilizationRows.length}`);
+
+  // ── Raw / Dirty Data for Pipeline Demo ──────────────────────────────────
+  console.log("Seeding raw (dirty) pipeline data...");
+  const dirtyRng = new SeededRng(999);
+
+  const VALID_ICD = ["E11.9", "I50.9", "J44.1", "I10", "N18.9", "J45.909", "F32.9"];
+  const MANGLED_ICD = ["E119", "I509", "J441", "I1O", "N189", "j45.909", "F329", "E11", "I50", "UNKNOWN", ""];
+  const VALID_DRUGS = ["Metformin", "Ozempic", "Jardiance", "Lisinopril", "Atorvastatin", "Losartan", "Albuterol", "Symbicort", "Sertraline"];
+  const MANGLED_DRUGS = ["metformin", "OZEMPIC", "jardiance", "Lisinoprl", "atorvastatin", "losartan HCL", "albuterol sulfate", "Symbicrt", "sertralin", "Unknown Drug", ""];
+  const CLAIM_TYPES = ["inpatient", "outpatient", "emergency", "preventive", "specialist"];
+  const DRUG_CLASSES = ["Antidiabetic", "GLP-1", "SGLT2", "ACE Inhibitor", "Statin", "ARB", "Bronchodilator", "SSRI", ""];
+
+  const memberIdPool = memberRows.map((m) => m.id);
+  const rawClaimRows: typeof schema.rawClaims.$inferInsert[] = [];
+
+  for (let i = 0; i < 200; i++) {
+    const dice = dirtyRng.next();
+    let memberId: string;
+    let icdCode: string;
+    let amount: number;
+    let date: string;
+
+    if (dice < 0.08) {
+      memberId = `M-ORPHAN-${i}`;
+    } else if (dice < 0.12) {
+      memberId = "";
+    } else {
+      memberId = dirtyRng.pick(memberIdPool);
+    }
+
+    if (dirtyRng.next() < 0.30) {
+      icdCode = dirtyRng.pick(MANGLED_ICD);
+    } else {
+      icdCode = dirtyRng.pick(VALID_ICD);
+    }
+
+    if (dirtyRng.next() < 0.05) {
+      amount = -dirtyRng.int(100, 5000);
+    } else if (dirtyRng.next() < 0.03) {
+      amount = 999999;
+    } else {
+      amount = dirtyRng.int(50, 15000);
+    }
+
+    if (dirtyRng.next() < 0.08) {
+      const future = new Date();
+      future.setDate(future.getDate() + dirtyRng.int(30, 365));
+      date = future.toISOString().split("T")[0];
+    } else if (dirtyRng.next() < 0.04) {
+      date = "";
+    } else {
+      const d = new Date(2023, dirtyRng.int(0, 11), dirtyRng.int(1, 28));
+      date = d.toISOString().split("T")[0];
+    }
+
+    rawClaimRows.push({
+      id: `RC-${String(i).padStart(4, "0")}`,
+      memberId,
+      icdCode,
+      type: dirtyRng.pick(CLAIM_TYPES),
+      amount,
+      date,
+      provider: `Provider-${dirtyRng.int(1, 20)}`,
+      sourceFile: dirtyRng.pick(["claims_feed_v1.csv", "legacy_claims.txt", "partner_extract.csv"]),
+    });
+  }
+
+  if (rawClaimRows.length > 5) {
+    rawClaimRows[rawClaimRows.length - 1].memberId = rawClaimRows[rawClaimRows.length - 2].memberId;
+    rawClaimRows[rawClaimRows.length - 1].icdCode = rawClaimRows[rawClaimRows.length - 2].icdCode;
+    rawClaimRows[rawClaimRows.length - 1].date = rawClaimRows[rawClaimRows.length - 2].date;
+    rawClaimRows[rawClaimRows.length - 1].amount = rawClaimRows[rawClaimRows.length - 2].amount;
+  }
+
+  for (let i = 0; i < rawClaimRows.length; i += BATCH) {
+    await db.insert(schema.rawClaims).values(rawClaimRows.slice(i, i + BATCH));
+  }
+  console.log(`  Raw Claims (dirty): ${rawClaimRows.length}`);
+
+  const rawPharmacyRows: typeof schema.rawPharmacy.$inferInsert[] = [];
+
+  for (let i = 0; i < 80; i++) {
+    const dice = dirtyRng.next();
+    let memberId: string;
+    let drugName: string;
+    let adherencePct: number;
+    let fillDate: string;
+
+    if (dice < 0.08) {
+      memberId = `M-ORPHAN-${200 + i}`;
+    } else {
+      memberId = dirtyRng.pick(memberIdPool);
+    }
+
+    if (dirtyRng.next() < 0.35) {
+      drugName = dirtyRng.pick(MANGLED_DRUGS);
+    } else {
+      drugName = dirtyRng.pick(VALID_DRUGS);
+    }
+
+    if (dirtyRng.next() < 0.10) {
+      adherencePct = dirtyRng.int(101, 200);
+    } else if (dirtyRng.next() < 0.05) {
+      adherencePct = -dirtyRng.int(1, 50);
+    } else {
+      adherencePct = dirtyRng.int(15, 98);
+    }
+
+    if (dirtyRng.next() < 0.10) {
+      fillDate = "";
+    } else {
+      const d = new Date(2023, dirtyRng.int(0, 11), dirtyRng.int(1, 28));
+      fillDate = d.toISOString().split("T")[0];
+    }
+
+    rawPharmacyRows.push({
+      id: `RP-${String(i).padStart(4, "0")}`,
+      memberId,
+      drugName,
+      drugClass: dirtyRng.pick(DRUG_CLASSES),
+      adherencePct,
+      fillDate,
+      sourceFile: dirtyRng.pick(["pharmacy_feed.csv", "pbm_extract.csv", "manual_entry.xlsx"]),
+    });
+  }
+
+  for (let i = 0; i < rawPharmacyRows.length; i += BATCH) {
+    await db.insert(schema.rawPharmacy).values(rawPharmacyRows.slice(i, i + BATCH));
+  }
+  console.log(`  Raw Pharmacy (dirty): ${rawPharmacyRows.length}`);
 
   console.log("Seed complete!");
   process.exit(0);

@@ -136,3 +136,57 @@ export const pipelineRuns = sqliteTable("pipeline_runs", {
   durationMs: integer("duration_ms").notNull().default(0),
   createdAt: text("created_at").notNull(),
 });
+
+export const rawClaims = sqliteTable("raw_claims", {
+  id: text("id").primaryKey(),
+  memberId: text("member_id").notNull().default(""),
+  icdCode: text("icd_code").notNull().default(""),
+  type: text("type").notNull().default(""),
+  amount: real("amount").notNull().default(0),
+  date: text("date").notNull().default(""),
+  provider: text("provider").notNull().default(""),
+  sourceFile: text("source_file").notNull().default("intake"),
+});
+
+export const rawPharmacy = sqliteTable("raw_pharmacy", {
+  id: text("id").primaryKey(),
+  memberId: text("member_id").notNull().default(""),
+  drugName: text("drug_name").notNull().default(""),
+  drugClass: text("drug_class").notNull().default(""),
+  adherencePct: real("adherence_pct").notNull().default(0),
+  fillDate: text("fill_date").notNull().default(""),
+  sourceFile: text("source_file").notNull().default("intake"),
+});
+
+export const stagingQuarantine = sqliteTable("staging_quarantine", {
+  id: text("id").primaryKey(),
+  sourceTable: text("source_table").notNull(),
+  sourceId: text("source_id").notNull(),
+  reason: text("reason").notNull(),
+  stepName: text("step_name").notNull(),
+  recordJson: text("record_json").notNull().default("{}"),
+  createdAt: text("created_at").notNull(),
+});
+
+export const dataProducts = sqliteTable("data_products", {
+  id: text("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull().default(""),
+  createdBy: text("created_by").notNull().default("agent"),
+  sourceTables: text("source_tables").notNull().default("[]"),
+  queryDefinition: text("query_definition").notNull().default("{}"),
+  version: integer("version").notNull().default(1),
+  status: text("status").notNull().default("draft"),
+  createdAt: text("created_at").notNull(),
+  updatedAt: text("updated_at").notNull(),
+});
+
+export const customSources = sqliteTable("custom_sources", {
+  id: text("id").primaryKey(),
+  tableName: text("table_name").notNull().unique(),
+  columnsJson: text("columns_json").notNull().default("[]"),
+  rowCount: integer("row_count").notNull().default(0),
+  createdBy: text("created_by").notNull().default("agent"),
+  description: text("description").notNull().default(""),
+  createdAt: text("created_at").notNull(),
+});

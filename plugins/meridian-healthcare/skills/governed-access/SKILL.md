@@ -1,7 +1,7 @@
 ---
-name: governed-access
+
+## name: governed-access
 description: Demonstrates governed agent-to-agent data access with human-in-the-loop approval. Use when a Codex agent needs healthcare data and must go through the governance gate with user confirmation.
----
 
 # Governed Access Skill
 
@@ -10,6 +10,7 @@ Execute healthcare data queries through the full governance lifecycle with user 
 ## When to use
 
 Use this skill when:
+
 - Querying member data on behalf of a specific team role
 - Demonstrating the A2A governance flow
 - The user asks about governed access, role-based permissions, or field masking
@@ -21,12 +22,14 @@ Use this skill when:
 
 Before doing anything, ask the user which role they want to query as. Present these four options clearly:
 
-| Role | Access Level | What's Blocked |
-|------|-------------|----------------|
-| **Care Manager** | Full access — all tools, SDOH, outreach, explanations | Nothing blocked |
-| **Analyst / Pharmacy** | Adherence and drug data visible | SDOH detail, outreach recommendations, selection explanations |
-| **Quality** | Aggregate compliance and gap analysis | SDOH detail, outreach, provider names |
-| **Admin** | Full administrative access | Nothing blocked |
+
+| Role                   | Access Level                                          | What's Blocked                                                |
+| ---------------------- | ----------------------------------------------------- | ------------------------------------------------------------- |
+| **Care Manager**       | Full access — all tools, SDOH, outreach, explanations | Nothing blocked                                               |
+| **Analyst / Pharmacy** | Adherence and drug data visible                       | SDOH detail, outreach recommendations, selection explanations |
+| **Quality**            | Aggregate compliance and gap analysis                 | SDOH detail, outreach, provider names                         |
+| **Admin**              | Full administrative access                            | Nothing blocked                                               |
+
 
 **Wait for the user to pick a role before proceeding.**
 
@@ -41,6 +44,7 @@ Input: { "role": "<chosen_role>", "intent": "<query_intent>" }
 ```
 
 Present the governance preview to the user. Highlight:
+
 - Whether the intent is **ALLOWED** or **BLOCKED**
 - The **policy note** explaining what this role can see
 - The **blocked fields** list (if any)
@@ -77,6 +81,7 @@ Input: {
 ### Step 5: Present results with governance metadata
 
 Show the results to the user with clear governance annotations:
+
 - **Role applied**: which role was used
 - **Fields blocked**: which columns were redacted (if any)
 - **Audit ID**: the unique audit trail reference
@@ -136,3 +141,4 @@ For maximum impact, run the same query as two different roles to show the differ
 - Do NOT call `governed_query` directly — use `request_governed_access` for the full flow
 - Do NOT call `get_risk_drivers`, `explain_member`, or `recommend_outreach` with governed masked references — use the inline data from `request_governed_access` or `governed_member_detail` instead
 - Do NOT read source files or write scripts
+
