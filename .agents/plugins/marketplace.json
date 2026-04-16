@@ -6,6 +6,9 @@
   "plugins": [
     {
       "name": "meridian-healthcare",
+      "interface": {
+        "displayName": "Meridian Healthcare Intelligence"
+      },
       "source": {
         "source": "local",
         "path": "./plugins/meridian-healthcare"
