@@ -47,18 +47,20 @@ export function ChatTranscript({ messages, status }: ChatTranscriptProps) {
             <Sparkles className="h-8 w-8 text-primary" />
           </div>
           <div className="space-y-2">
-            <h2 className="text-xl font-semibold tracking-tight">What can I help you with?</h2>
+            <h2 className="text-xl font-semibold tracking-tight">Ask the governed assistant</h2>
             <p className="text-sm text-muted-foreground leading-relaxed">
-              Ask about member cohorts, risk drivers, outreach recommendations,
-              or explore population health data across your organization.
+              This demo uses 500 synthetic members (IDs like{" "}
+              <span className="font-mono text-foreground/80">M-1042</span>) with claims, pharmacy,
+              SDOH, utilization, and call-center data. Query cohorts by state, chronic conditions, and
+              risk tier; drill into a member; chart aggregates; or draft outreach from risk drivers.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-2 pt-2">
             {[
-              "High-risk members in TX",
-              "Transportation barriers",
-              "Risk tier breakdown",
-              "Medication adherence",
+              "Find high-risk members with diabetes in TX and FL",
+              "Explain member M-1042 including recent claims",
+              "Generate a chart of claims volume by type",
+              "Recommend outreach for M-1042 for transportation and medication adherence",
             ].map((hint) => (
               <button
                 key={hint}

@@ -25,10 +25,10 @@ import { cn } from "@/lib/utils";
 import type { SavedChat } from "@/lib/chat-store";
 
 const SUGGESTED_PROMPTS = [
-  "Find high-risk diabetic members in TX and FL",
-  "Show risk drivers for transportation barriers",
-  "Generate a chart of members by risk tier",
-  "Recommend outreach for medication non-adherence",
+  "Find high-risk members with diabetes in TX and FL",
+  "Show risk drivers for member M-1042",
+  "Generate a bar chart of members by state",
+  "Recommend outreach for member M-1042 with drivers: transportation, medication adherence",
 ];
 
 const NAV_ITEMS = [

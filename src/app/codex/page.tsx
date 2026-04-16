@@ -445,10 +445,10 @@ export default function CodexPage() {
               </CardHeader>
               <CardContent className="space-y-2">
                 {[
-                  "Find high-risk diabetic members in TX and FL where transportation is a barrier",
+                  "Find high-risk members with diabetes in TX and FL (results include SDOH flags)",
                   "Show risk drivers for member M-1042",
-                  "Recommend outreach for members with medication non-adherence",
-                  "Generate a chart of claims by type",
+                  "Recommend outreach for member M-1042 with medication adherence as a driver",
+                  "Generate a chart of claims volume by type",
                 ].map((q, i) => (
                   <div
                     key={i}

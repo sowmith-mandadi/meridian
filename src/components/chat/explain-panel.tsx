@@ -150,7 +150,8 @@ function DefaultOverview() {
       </Card>
 
       <p className="text-xs text-muted-foreground text-center px-2 leading-relaxed">
-        Ask a question to see risk drivers, member explanations, and outreach recommendations here.
+        Run a chat query to mirror tool output here: cohort tables, risk drivers and member
+        explanations (use member IDs like M-1042), Recharts-ready aggregates, and outreach plans.
       </p>
     </div>
   );

@@ -44,7 +44,7 @@ export function ChatInput({ onSend, isStreaming }: ChatInputProps) {
         <div className="flex gap-2 items-end rounded-2xl border border-border/60 bg-card px-3 py-2 shadow-sm focus-within:ring-2 focus-within:ring-primary/20 focus-within:border-primary/40 transition-all duration-200">
           <Textarea
             ref={ref}
-            placeholder="Ask about cohorts, risk drivers, outreach..."
+            placeholder="Cohort (state, condition, risk tier), member M-…, chart (claims, state, utilization), or outreach…"
             className="min-h-[40px] max-h-[120px] resize-none text-sm border-0 shadow-none focus-visible:ring-0 p-0 bg-transparent placeholder:text-muted-foreground/60"
             onKeyDown={handleKeyDown}
             disabled={isStreaming}
