@@ -8,9 +8,18 @@ import {
   utilization,
   pipelineRuns,
 } from "@/lib/schema";
+import { getPipelineQualitySnapshot } from "@/lib/pipeline-quality";
 import { sql, count, avg, min, max } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
+
+export async function GET() {
+  const qualitySnapshot = await getPipelineQualitySnapshot();
+
+  return Response.json({
+    qualitySnapshot,
+  });
+}
 
 const VALID_ICD_CODES = new Set([
   "E11.9", "I50.9", "J44.1", "I10", "N18.9", "J45.909", "F32.9", "Z00.0",
@@ -307,6 +316,7 @@ export async function POST() {
   const encoder = new TextEncoder();
   const stream = new ReadableStream({
     async start(controller) {
+      const qualitySnapshot = await getPipelineQualitySnapshot();
       const steps = [runIngest, runProfile, runStandardize, runEntityResolve, runValidate];
       const results: StepResult[] = [];
       let totalMs = 0;
@@ -342,6 +352,7 @@ export async function POST() {
           stepsTotal: results.length,
           totalDurationMs: totalMs,
           qualityScore: validateOutput?.qualityScore ?? "N/A",
+          qualitySnapshot,
           readyForModeling: validateOutput?.readyForModeling ?? false,
         },
       };

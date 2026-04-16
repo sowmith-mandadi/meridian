@@ -35,7 +35,7 @@ export default function LoginPage() {
     if (res?.error) {
       setError("Invalid credentials");
     } else {
-      router.push("/chat");
+      router.push("/codex");
     }
   }
 
@@ -51,7 +51,7 @@ export default function LoginPage() {
     if (res?.error) {
       setError("Login failed");
     } else {
-      router.push("/chat");
+      router.push("/codex");
     }
   }
 
