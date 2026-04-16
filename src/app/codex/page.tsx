@@ -115,23 +115,74 @@ export default function CodexPage() {
             <Card className="border-destructive/20 bg-destructive/[0.02]">
               <CardContent className="pt-6">
                 <p className="text-sm font-semibold text-destructive mb-3">The Problem</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>70% of analytics time spent on data preparation</li>
-                  <li>Fragmented silos — no unified member view</li>
-                  <li>Weeks to build each data pipeline manually</li>
-                  <li>Downstream teams can't safely query or act on data</li>
-                </ul>
+                <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                  <p>
+                    Healthcare organizations need to improve care management, prioritize outreach,
+                    support operations, and identify members who may need early intervention. But
+                    the data behind those decisions is scattered across many systems, difficult to
+                    reconcile, and tightly controlled because it contains sensitive health information.
+                  </p>
+                  <p>
+                    That creates a familiar pattern: technical teams spend huge amounts of time
+                    pulling data together, cleaning it, validating it, and stitching it into
+                    something usable. Then a downstream team asks for a new feature, a new
+                    population, or a new slice of the data, and the cycle starts again.
+                  </p>
+                  <div className="rounded-lg border border-destructive/10 bg-background/60 p-3">
+                    <p className="text-xs font-medium uppercase tracking-wide text-destructive/80 mb-1">
+                      Concrete Example
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Build a trusted member-level asset for predicting hospitalization risk over
+                      the next six months, then make that output usable for downstream
+                      care-management workflows.
+                    </p>
+                  </div>
+                </div>
               </CardContent>
             </Card>
             <Card className="border-primary/20 bg-primary/[0.02]">
               <CardContent className="pt-6">
                 <p className="text-sm font-semibold text-primary mb-3">Meridian's Solution</p>
-                <ul className="space-y-2 text-sm text-muted-foreground">
-                  <li>Agents build data products from natural language</li>
-                  <li>10 composable pipeline tools with real write ops</li>
-                  <li>Governed chat for care coordination and outreach</li>
-                  <li>Feedback loop drives continuous improvement</li>
-                </ul>
+                <div className="space-y-3 text-sm text-muted-foreground leading-relaxed">
+                  <p>
+                    Meridian creates a reusable and governed workflow that reduces manual handoffs,
+                    helps technical teams build trusted data assets faster, and makes those assets
+                    safely usable by downstream teams through role-based agents.
+                  </p>
+                  <div className="space-y-2">
+                    <div className="rounded-lg border bg-background/70 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-primary mb-1">
+                        1. Build The Asset
+                      </p>
+                      <p>
+                        Codex starts from plain-English requirements in <code className="text-foreground">AGENTS.md</code>,
+                        generates a reviewable technical spec, and helps create pipeline logic,
+                        validation checks, and reusable skills.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-background/70 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-primary mb-1">
+                        2. Operationalize It
+                      </p>
+                      <p>
+                        The trusted asset is exposed through a governed Vercel app where admins,
+                        care managers, and analysts use the same asset through different
+                        permissions, tools, and workflows.
+                      </p>
+                    </div>
+                    <div className="rounded-lg border bg-background/70 p-3">
+                      <p className="text-xs font-medium uppercase tracking-wide text-primary mb-1">
+                        3. Improve It Continuously
+                      </p>
+                      <p>
+                        New downstream requests become spec updates, code changes, validation
+                        workflows, and reviewable outputs, so each request strengthens a reusable
+                        governed asset instead of creating more one-off work.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>
