@@ -89,7 +89,7 @@ export default function CodexPage() {
             <Link href="/pipeline">
               <Button variant="outline" size="lg" className="gap-2">
                 <Play className="h-4 w-4" />
-                Run Pipeline
+                Pipeline
               </Button>
             </Link>
           </div>
@@ -375,7 +375,7 @@ export default function CodexPage() {
             <Link href="/pipeline">
               <Button variant="outline" size="sm" className="gap-2">
                 <Play className="h-3.5 w-3.5" />
-                Run Pipeline
+                Pipeline
               </Button>
             </Link>
             <Link href="/collaborate">
