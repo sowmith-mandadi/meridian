@@ -1,4 +1,5 @@
 import { drizzle } from "drizzle-orm/libsql/node";
+import { sql } from "drizzle-orm";
 import * as schema from "../src/lib/schema";
 
 // ── Seed RNG (deterministic) ───────────────────────────────────────────────
@@ -191,6 +192,20 @@ async function seed() {
   const authToken = process.env.TURSO_AUTH_TOKEN;
   console.log(`Connecting to: ${url.startsWith("file:") ? url : url.replace(/\/\/.*@/, "//***@")}`);
   const db = drizzle({ connection: { url, authToken }, schema });
+
+  console.log("Clearing existing data...");
+  await db.run(sql`DELETE FROM ${schema.usageLog}`);
+  await db.run(sql`DELETE FROM ${schema.feedbackRequests}`);
+  await db.run(sql`DELETE FROM ${schema.auditLog}`);
+  await db.run(sql`DELETE FROM ${schema.pipelineRuns}`);
+  await db.run(sql`DELETE FROM ${schema.callCenter}`);
+  await db.run(sql`DELETE FROM ${schema.utilization}`);
+  await db.run(sql`DELETE FROM ${schema.sdoh}`);
+  await db.run(sql`DELETE FROM ${schema.pharmacy}`);
+  await db.run(sql`DELETE FROM ${schema.claims}`);
+  await db.run(sql`DELETE FROM ${schema.members}`);
+  await db.run(sql`DELETE FROM ${schema.users}`);
+  console.log("  Existing data cleared.");
 
   console.log("Seeding database...");
   const rng = new SeededRng(42);
