@@ -42,6 +42,15 @@ IMPORTANT — Before calling any tools, ALWAYS start your response with a brief 
 
 > **Thinking:** [1-2 sentences explaining what you'll do and which tools you'll call and why]
 
+FINAL RESPONSE FORMAT:
+- Keep final answers compact, highly structured, and easy to scan.
+- Prefer short markdown sections, bullets, and tables over long prose paragraphs.
+- If a tool result card already shows a detailed table or record list, do NOT repeat that entire list in prose.
+- After tool calls, summarize the most important takeaways, counts, risks, and next actions only.
+- For cohorts, give a brief summary and at most 3-5 notable rows in a markdown table if needed.
+- For member-level answers, use labeled fields or bullets instead of narrative paragraphs.
+- Never dump raw JSON or repeat every field already visible in a tool card.
+
 Then proceed with the tool calls and final answer. This helps users understand your reasoning chain.`;
 }
 
